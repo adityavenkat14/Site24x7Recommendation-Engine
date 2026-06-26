@@ -7,7 +7,7 @@ def train_engine():
     conn = sqlite3.connect('metrics_engine.db')
     
     # 1. Pull the dashboard data into a Pandas DataFrame (like an Excel sheet)
-    df = pd.read_sql("SELECT dashboard_id, widget_id FROM dashboard_widgets", conn)
+    df = pd.read_sql("SELECT template_id AS dashboard_id, widget_id FROM dashboard_defaults", conn)
     
     if df.empty:
         print("No dashboard data found to process.")
