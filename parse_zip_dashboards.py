@@ -18,14 +18,12 @@ def scan_all_19_dashboards():
     conn = sqlite3.connect('metrics_engine.db')
     cursor = conn.cursor()
 
-    # Reset schemas to a clean, fresh state
-    tables = ["widgets", "dashboard_templates", "dashboard_defaults", "rec_co_occurrence"]
-    for t in tables: cursor.execute(f"DROP TABLE IF EXISTS {t}")
-
-    cursor.execute('CREATE TABLE widgets (widget_id TEXT PRIMARY KEY, widget_name TEXT, category_tag TEXT)')
-    cursor.execute('CREATE TABLE dashboard_templates (template_id TEXT PRIMARY KEY, template_name TEXT, category_tag TEXT)')
-    cursor.execute('CREATE TABLE dashboard_defaults (template_id TEXT, widget_id TEXT, PRIMARY KEY(template_id, widget_id))')
-    cursor.execute('CREATE TABLE rec_co_occurrence (widget_a_id TEXT, widget_b_id TEXT, confidence_score REAL, PRIMARY KEY(widget_a_id, widget_b_id))')
+    # FIXED: Removed the DROP TABLE loop to protect existing data structures from disappearing.
+    # Instead, we safely initialize the schemas only if they do not exist.
+    cursor.execute('CREATE TABLE IF NOT EXISTS widgets (widget_id TEXT PRIMARY KEY, widget_name TEXT, category_tag TEXT)')
+    cursor.execute('CREATE TABLE IF NOT EXISTS dashboard_templates (template_id TEXT PRIMARY KEY, template_name TEXT, category_tag TEXT)')
+    cursor.execute('CREATE TABLE IF NOT EXISTS dashboard_defaults (template_id TEXT, widget_id TEXT, PRIMARY KEY(template_id, widget_id))')
+    cursor.execute('CREATE TABLE IF NOT EXISTS rec_co_occurrence (widget_a_id TEXT, widget_b_id TEXT, confidence_score REAL, PRIMARY KEY(widget_a_id, widget_b_id))')
 
     image_extensions = ('.png', '.jpg', '.jpeg', '.webp')
     
@@ -36,6 +34,7 @@ def scan_all_19_dashboards():
     if not all_zip_files:
         print("❌ Error: Couldn't detect any .zip assets inside your recommendation engine folder pathway!")
         print(f"Make sure your zip bundles are placed directly inside: {current_dir}")
+        conn.close()
         return
 
     print(f"📦 Detected {len(all_zip_files)} deployment configuration ZIP archives. Initializing processing loop...")
