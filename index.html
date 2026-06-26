@@ -16,7 +16,11 @@
         .btn-custom { background: #0284c7; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
         .btn-save { background: #10b981; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
         
-        /* NEW: Plus Button Widget Creation Style Block */
+        /* Permanent Add Button Style */
+        .btn-direct-add { background: #6366f1; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.15s; }
+        .btn-direct-add:hover { background: #4f46e5; }
+
+        /* Plus Button Widget Creation Style Block */
         .widget-injector-wrap { display: flex; align-items: center; gap: 6px; background: #0f172a; border: 1px dashed #0284c7; padding: 4px; border-radius: 8px; }
         .btn-plus-add { background: #0284c7; color: white; border: none; width: 32px; height: 32px; border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.15s; }
         .btn-plus-add:hover { background: #0ea5e9; }
@@ -32,6 +36,7 @@
 
         .canvas-grid { flex: 1; padding: 25px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; align-content: flex-start; }
         .step1-lock-hint { grid-column: 1/-1; text-align: center; color: #475569; margin-top: 150px; background: #111827; padding: 40px; border-radius: 12px; border: 2px dashed #1e293b; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .empty-hint { grid-column: 1/-1; text-align: center; color: #475569; margin-top: 100px; }
         
         .widget-card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px; position: relative; height: 185px; display: flex; flex-direction: column; justify-content: space-between; }
         .close-btn { position: absolute; top: 12px; right: 12px; background: none; border: none; color: #64748b; cursor: pointer; font-size: 14px; font-weight: bold; }
@@ -71,13 +76,15 @@
             <button class="btn-save" id="save-dash-btn" style="display:none;" onclick="commitDashboardToDatabase()">💾 Save Layout Config</button>
             <button class="btn-custom" id="custom-init-btn" onclick="activateCustomFlowUI()">➕ Custom Dashboard</button>
             
+            <button class="btn-direct-add" id="direct-add-widget-btn" onclick="promptAndInjectCustomWidget()">✨ Add Custom Metric</button>
+
             <div class="widget-injector-wrap" id="manual-widget-injector" style="display: none;">
                 <input type="text" id="manual-widget-name" placeholder="Custom Widget Name..." style="border: none; padding: 6px 10px; font-size: 12px; width: 160px;">
                 <button class="btn-plus-add" onclick="injectManualCustomWidget()" title="Add Custom Widget Entirely">+</button>
             </div>
 
             <select id="template-select" onchange="executeStep1TemplateWorkflow()">
-                </select>
+            </select>
         </div>
     </nav>
 
@@ -125,7 +132,7 @@
         function activateCustomFlowUI() {
             document.getElementById('template-select').value = "";
             document.getElementById('bundle-banner').style.display = 'none';
-            document.getElementById('manual-widget-injector').style.display = 'none'; // Keep hidden until step 2 confirmed
+            document.getElementById('manual-widget-injector').style.display = 'none'; 
             
             document.getElementById('custom-dash-name').style.display = 'block';
             document.getElementById('custom-dash-name').value = '';
@@ -147,7 +154,6 @@
         async function executeStep1TemplateWorkflow() {
             const selectEl = document.getElementById('template-select');
             const selectedOption = selectEl.options[selectEl.selectedIndex];
-            const templateId = selectEl.value;
             activeCategoryTag = selectedOption.getAttribute('data-category');
             const chosenName = selectedOption.text;
             
@@ -160,9 +166,6 @@
         }
 
         async function triggerStep2Fetch(category, dashboardDisplayName) {
-            // REMOVED: currentDashboardWidgets = []; renderCanvas(); 
-            // This prevents the page from crashing or losing state while you type!
-            
             document.getElementById('recommendations-panel').innerHTML = '<div class="locked-placeholder">Awaiting Step 2 confirmation...</div>';
 
             const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboard-defaults?category=${category}&dashboard_name=${encodeURIComponent(dashboardDisplayName)}`);
@@ -172,8 +175,33 @@
             renderStep2BundleBanner();
         }
 
+        function renderStep2BundleBanner() {
+            const banner = document.getElementById('bundle-banner');
+            const container = document.getElementById('bundle-options-container');
+            
+            let generatedContent = '';
+
+            if (!fetchedDefaultsBuffer || fetchedDefaultsBuffer.length === 0) {
+                container.innerHTML = '<span style="font-size:12px; color:#94a3b8;">Type a context name to load starter tracks...</span>';
+                banner.style.display = 'flex';
+                return;
+            }
+
+            fetchedDefaultsBuffer.forEach((item, index) => {
+                generatedContent += `
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="chk-def-${index}" value="${item.widget_id}" data-name="${item.name}" checked>
+                        <span>${item.name}</span>
+                    </label>
+                `;
+            });
+
+            generatedContent += `<button class="btn-bundle" onclick="applyStep2Selections()">Apply Checked Components</button>`;
+            container.innerHTML = generatedContent;
+            banner.style.display = 'flex';
+        }
+
         function applyStep2Selections() {
-            // Clear previous widgets ONLY when the user explicitly clicks the "Apply" button
             currentDashboardWidgets = []; 
             
             fetchedDefaultsBuffer.forEach((item, index) => {
@@ -184,8 +212,6 @@
             });
 
             document.getElementById('bundle-banner').style.display = 'none';
-            
-            // Unlock the plus button tool box
             document.getElementById('manual-widget-injector').style.display = 'flex';
             document.getElementById('manual-widget-name').value = '';
             
@@ -193,49 +219,33 @@
             fetchRecommendations();
         }
 
-        function renderStep2BundleBanner() {
-            const banner = document.getElementById('bundle-banner');
-            const container = document.getElementById('bundle-options-container');
-            container.innerHTML = '';
-
-            if (!fetchedDefaultsBuffer || fetchedDefaultsBuffer.length === 0) {
-                container.innerHTML = '<span style="font-size:12px; color:#94a3b8;">Type a context name to load starter tracks...</span>';
-                banner.style.display = 'flex';
+        /* NEW: Standalone Prompt Dialog Injection Handler */
+        function promptAndInjectCustomWidget() {
+            const customName = prompt("Enter a unique title for your custom metric widget:");
+            if (customName === null) return; // User pressed cancel
+            
+            const trimmedName = customName.trim();
+            if (!trimmedName) {
+                alert("Metric widget names cannot be blank!");
                 return;
             }
 
-            fetchedDefaultsBuffer.forEach((item, index) => {
-                container.innerHTML += `
-                    <label class="checkbox-container">
-                        <input type="checkbox" id="chk-def-${index}" value="${item.widget_id}" data-name="${item.name}" checked>
-                        <span>${item.name}</span>
-                    </label>
-                `;
+            // Fallback default context setup if canvas hasn't been initialized by template workflows
+            if (!activeCategoryTag) {
+                activeCategoryTag = "general";
+            }
+
+            const uniqueId = "manual_widget_" + Date.now();
+            currentDashboardWidgets.push({
+                id: uniqueId,
+                name: trimmedName,
+                renderType: 'bar'
             });
 
-            container.innerHTML += `<button class="btn-bundle" onclick="applyStep2Selections()">Apply Checked Components</button>`;
-            banner.style.display = 'flex';
-        }
-
-        function applyStep2Selections() {
-            fetchedDefaultsBuffer.forEach((item, index) => {
-                const chk = document.getElementById(`chk-def-${index}`);
-                if (chk && chk.checked) {
-                    currentDashboardWidgets.push({ id: item.widget_id, name: item.name, renderType: 'bar' });
-                }
-            });
-
-            document.getElementById('bundle-banner').style.display = 'none';
-            
-            // UNLOCK THE PLUS BUTTON MANIFOLD INSIDE THE TOOLBAR
-            document.getElementById('manual-widget-injector').style.display = 'flex';
-            document.getElementById('manual-widget-name').value = '';
-            
             renderCanvas();
             fetchRecommendations();
         }
 
-        // NEW: Plus Button Core Event Logic Execution Frame
         function injectManualCustomWidget() {
             const inputField = document.getElementById('manual-widget-name');
             const customName = inputField.value.trim();
@@ -246,19 +256,15 @@
             }
 
             const uniqueId = "manual_widget_" + Date.now();
-            
-            // Push directly onto the layout grid
             currentDashboardWidgets.push({
                 id: uniqueId,
                 name: customName,
                 renderType: 'bar'
             });
 
-            // Flush out input field text state strings
             inputField.value = '';
-            
             renderCanvas();
-            fetchRecommendations(); // Instantly update Step 3 tracking side panels
+            fetchRecommendations(); 
         }
 
         function addWidget(id, name) {
@@ -330,7 +336,7 @@
                             <div class="chart-bar" style="height: ${bar1}%; opacity: 0.4;"></div>
                             <div class="chart-bar" style="height: ${bar2}%; opacity: 0.6;"></div>
                             <div class="chart-bar" style="height: ${bar3}%; opacity: 0.8;"></div>
-                            <div class="chart-bar" style="height: ${bar4} ..."></div>
+                            <div class="chart-bar" style="height: ${bar4}%;"></div>
                         </div>
                         <div style="display:flex; flex-direction:column; justify-content:center; align-items:flex-end; min-width:65px;">
                             <span style="font-size:10px; color:#475569; font-weight:bold; text-transform:uppercase;">Latest</span>
