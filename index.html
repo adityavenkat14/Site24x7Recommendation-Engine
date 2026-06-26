@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> Dashboard Recommendation Engine</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { display: flex; flex-direction: column; height: 100vh; background-color: #0f172a; color: #f8fafc; overflow: hidden; }
+        
+        nav { background: #1e293b; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; }
+        .logo { font-weight: 700; font-size: 14px; color: #38bdf8; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-actions { display: flex; gap: 12px; align-items: center; }
+        select, input { background: #0f172a; color: #f8fafc; border: 1px solid #475569; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; outline: none; }
+        input::placeholder { color: #475569; }
+        
+        .btn-custom { background: #0284c7; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .btn-save { background: #10b981; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        
+        /* NEW: Plus Button Widget Creation Style Block */
+        .widget-injector-wrap { display: flex; align-items: center; gap: 6px; background: #0f172a; border: 1px dashed #0284c7; padding: 4px; border-radius: 8px; }
+        .btn-plus-add { background: #0284c7; color: white; border: none; width: 32px; height: 32px; border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.15s; }
+        .btn-plus-add:hover { background: #0ea5e9; }
+
+        .main-frame { display: flex; flex: 1; overflow: hidden; }
+        .workspace-center { flex: 1; display: flex; flex-direction: column; background: #090d16; overflow: hidden; }
+        
+        .bundle-banner { background: #1e1b4b; border-bottom: 2px solid #4f46e5; padding: 20px 25px; display: none; flex-direction: column; gap: 12px; }
+        .bundle-title { font-size: 13px; font-weight: 700; color: #818cf8; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bundle-options { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; max-height: 120px; overflow-y: auto; padding: 5px; }
+        .checkbox-container { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; cursor: pointer; background: #312e81; padding: 6px 12px; border-radius: 6px; border: 1px solid #4338ca; white-space: nowrap; }
+        .btn-bundle { background: #38bdf8; color: #0f172a; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 800; cursor: pointer; margin-left: auto; }
+
+        .canvas-grid { flex: 1; padding: 25px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; align-content: flex-start; }
+        .step1-lock-hint { grid-column: 1/-1; text-align: center; color: #475569; margin-top: 150px; background: #111827; padding: 40px; border-radius: 12px; border: 2px dashed #1e293b; max-width: 600px; margin-left: auto; margin-right: auto; }
+        
+        .widget-card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px; position: relative; height: 185px; display: flex; flex-direction: column; justify-content: space-between; }
+        .close-btn { position: absolute; top: 12px; right: 12px; background: none; border: none; color: #64748b; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .close-btn:hover { color: #f43f5e; }
+        
+        .chart-mock-box { height: 80px; background: #0f172a; border-radius: 6px; display: flex; align-items: center; justify-content: space-around; padding: 10px; border: 1px solid #1e293b; overflow: hidden; }
+        .simplified-bar-container { display: flex; align-items: flex-end; justify-content: center; gap: 16px; width: 100%; height: 100%; padding-top: 5px; }
+        .chart-bar { width: 24px; background: linear-gradient(to top, #0284c7, #38bdf8); border-radius: 4px 4px 0 0; min-height: 6px; }
+
+        .kpi-value-text { font-size: 28px; font-weight: 800; color: #38bdf8; letter-spacing: -0.5px; }
+        .kpi-unit { font-size: 13px; color: #475569; font-weight: 500; margin-left: 2px; }
+
+        .pie-chart-circle { width: 55px; height: 55px; border-radius: 50%; position: relative; }
+        .pie-chart-circle::after { content: ''; position: absolute; width: 33px; height: 33px; background: #0f172a; border-radius: 50%; top: 11px; left: 11px; }
+
+        .widget-controls { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b; margin-top: 2px; }
+        .type-select-mini { background: #0f172a; color: #94a3b8; border: 1px solid #334155; font-size: 10px; padding: 2px 4px; border-radius: 4px; cursor: pointer; }
+
+        .sidebar-right { width: 380px; background: #1e293b; border-left: 1px solid #334155; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 15px 20px; font-weight: 700; font-size: 13px; text-transform: uppercase; color: #f59e0b; border-bottom: 1px solid #334155; }
+        .rec-container { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 14px; }
+        
+        .amazon-rec-card { background: #0f172a; border: 1px dashed #f59e0b; border-radius: 8px; padding: 15px; display: flex; flex-direction: column; gap: 8px; position: relative; }
+        .rec-badge { position: absolute; top: 15px; right: 15px; background: #f59e0b; color: #0f172a; font-size: 9px; font-weight: 800; padding: 2px 5px; border-radius: 4px; }
+        .btn-add-rec { background: #f59e0b; color: #0f172a; border: none; width: 100%; padding: 8px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; margin-top: 5px; }
+        
+        .locked-placeholder { text-align: center; color: #475569; font-size: 13px; font-style: italic; margin-top: 40px; padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">⚡ Site24x7 Recommendation Engine</div>
+        <div class="nav-actions">
+            <input type="text" id="custom-dash-name" placeholder="Enter Dashboard Name..." style="display:none; width:180px;">
+            <input type="text" id="custom-dash-type-text" placeholder="Type (e.g., shopping)..." style="display:none; width:160px;">
+            <button class="btn-save" id="save-dash-btn" style="display:none;" onclick="commitDashboardToDatabase()">💾 Save Layout Config</button>
+            <button class="btn-custom" id="custom-init-btn" onclick="activateCustomFlowUI()">➕ Custom Dashboard</button>
+            
+            <div class="widget-injector-wrap" id="manual-widget-injector" style="display: none;">
+                <input type="text" id="manual-widget-name" placeholder="Custom Widget Name..." style="border: none; padding: 6px 10px; font-size: 12px; width: 160px;">
+                <button class="btn-plus-add" onclick="injectManualCustomWidget()" title="Add Custom Widget Entirely">+</button>
+            </div>
+
+            <select id="template-select" onchange="executeStep1TemplateWorkflow()">
+                </select>
+        </div>
+    </nav>
+
+    <div class="main-frame">
+        <div class="workspace-center">
+            
+            <div class="bundle-banner" id="bundle-banner">
+                <div class="bundle-title" id="bundle-banner-title">Step 2: Recommended Default Starter Options</div>
+                <div class="bundle-options" id="bundle-options-container"></div>
+            </div>
+
+            <div class="canvas-grid" id="canvas-grid">
+                <div class="step1-lock-hint" id="canvas-lock-message">
+                    <h3 style="color:#94a3b8; margin-bottom: 8px;">🔒 Workspace Locked</h3>
+                    <p style="font-size:13px; color:#475569;">Step 1 Prerequisite Missing: Please select a baseline template dropdown or initiate a custom layout config profile above to unlock workflow tracks.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-right">
+            <div class="sidebar-header">💡 Step 3: Adaptive Cross-Pairings</div>
+            <div class="rec-container" id="recommendations-panel">
+                <div class="locked-placeholder">Awaiting Step 1 completion...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDashboardWidgets = [];
+        let fetchedDefaultsBuffer = [];
+        let activeCategoryTag = "";
+        let customDebounceTimer = null;
+
+        async function initStudio() {
+            const res = await fetch('http://127.0.0.1:8000/api/v1/dashboards');
+            const data = await res.json();
+            const select = document.getElementById('template-select');
+            select.innerHTML = '<option value="" disabled selected>Or choose a baseline template...</option>';
+            data.forEach(d => {
+                select.innerHTML += `<option value="${d.id}" data-category="${d.category}">${d.name}</option>`;
+            });
+            document.getElementById('recommendations-panel').innerHTML = '<div class="locked-placeholder">Awaiting Step 1 completion...</div>';
+        }
+
+        function activateCustomFlowUI() {
+            document.getElementById('template-select').value = "";
+            document.getElementById('bundle-banner').style.display = 'none';
+            document.getElementById('manual-widget-injector').style.display = 'none'; // Keep hidden until step 2 confirmed
+            
+            document.getElementById('custom-dash-name').style.display = 'block';
+            document.getElementById('custom-dash-name').value = '';
+            document.getElementById('custom-dash-type-text').style.display = 'block';
+            document.getElementById('custom-dash-type-text').value = '';
+            document.getElementById('save-dash-btn').style.display = 'block';
+            
+            document.getElementById('custom-dash-type-text').oninput = function() {
+                clearTimeout(customDebounceTimer);
+                customDebounceTimer = setTimeout(() => {
+                    let textVal = this.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
+                    let dashName = document.getElementById('custom-dash-name').value.trim() || "Custom Dashboard";
+                    activeCategoryTag = textVal ? textVal : "general";
+                    triggerStep2Fetch(activeCategoryTag, dashName);
+                }, 400);
+            };
+        }
+
+        async function executeStep1TemplateWorkflow() {
+            const selectEl = document.getElementById('template-select');
+            const selectedOption = selectEl.options[selectEl.selectedIndex];
+            const templateId = selectEl.value;
+            activeCategoryTag = selectedOption.getAttribute('data-category');
+            const chosenName = selectedOption.text;
+            
+            document.getElementById('custom-dash-name').style.display = 'none';
+            document.getElementById('custom-dash-type-text').style.display = 'none';
+            document.getElementById('save-dash-btn').style.display = 'none';
+            document.getElementById('manual-widget-injector').style.display = 'none';
+
+            triggerStep2Fetch(activeCategoryTag, chosenName);
+        }
+
+        async function triggerStep2Fetch(category, dashboardDisplayName) {
+            // REMOVED: currentDashboardWidgets = []; renderCanvas(); 
+            // This prevents the page from crashing or losing state while you type!
+            
+            document.getElementById('recommendations-panel').innerHTML = '<div class="locked-placeholder">Awaiting Step 2 confirmation...</div>';
+
+            const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboard-defaults?category=${category}&dashboard_name=${encodeURIComponent(dashboardDisplayName)}`);
+            fetchedDefaultsBuffer = await res.json();
+
+            document.getElementById('bundle-banner-title').innerText = `Step 2: Mapped Core Suggestions for "${dashboardDisplayName}"`;
+            renderStep2BundleBanner();
+        }
+
+        function applyStep2Selections() {
+            // Clear previous widgets ONLY when the user explicitly clicks the "Apply" button
+            currentDashboardWidgets = []; 
+            
+            fetchedDefaultsBuffer.forEach((item, index) => {
+                const chk = document.getElementById(`chk-def-${index}`);
+                if (chk && chk.checked) {
+                    currentDashboardWidgets.push({ id: item.widget_id, name: item.name, renderType: 'bar' });
+                }
+            });
+
+            document.getElementById('bundle-banner').style.display = 'none';
+            
+            // Unlock the plus button tool box
+            document.getElementById('manual-widget-injector').style.display = 'flex';
+            document.getElementById('manual-widget-name').value = '';
+            
+            renderCanvas();
+            fetchRecommendations();
+        }
+
+        function renderStep2BundleBanner() {
+            const banner = document.getElementById('bundle-banner');
+            const container = document.getElementById('bundle-options-container');
+            container.innerHTML = '';
+
+            if (!fetchedDefaultsBuffer || fetchedDefaultsBuffer.length === 0) {
+                container.innerHTML = '<span style="font-size:12px; color:#94a3b8;">Type a context name to load starter tracks...</span>';
+                banner.style.display = 'flex';
+                return;
+            }
+
+            fetchedDefaultsBuffer.forEach((item, index) => {
+                container.innerHTML += `
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="chk-def-${index}" value="${item.widget_id}" data-name="${item.name}" checked>
+                        <span>${item.name}</span>
+                    </label>
+                `;
+            });
+
+            container.innerHTML += `<button class="btn-bundle" onclick="applyStep2Selections()">Apply Checked Components</button>`;
+            banner.style.display = 'flex';
+        }
+
+        function applyStep2Selections() {
+            fetchedDefaultsBuffer.forEach((item, index) => {
+                const chk = document.getElementById(`chk-def-${index}`);
+                if (chk && chk.checked) {
+                    currentDashboardWidgets.push({ id: item.widget_id, name: item.name, renderType: 'bar' });
+                }
+            });
+
+            document.getElementById('bundle-banner').style.display = 'none';
+            
+            // UNLOCK THE PLUS BUTTON MANIFOLD INSIDE THE TOOLBAR
+            document.getElementById('manual-widget-injector').style.display = 'flex';
+            document.getElementById('manual-widget-name').value = '';
+            
+            renderCanvas();
+            fetchRecommendations();
+        }
+
+        // NEW: Plus Button Core Event Logic Execution Frame
+        function injectManualCustomWidget() {
+            const inputField = document.getElementById('manual-widget-name');
+            const customName = inputField.value.trim();
+            
+            if(!customName) {
+                alert("Please enter a name for your custom metric widget!");
+                return;
+            }
+
+            const uniqueId = "manual_widget_" + Date.now();
+            
+            // Push directly onto the layout grid
+            currentDashboardWidgets.push({
+                id: uniqueId,
+                name: customName,
+                renderType: 'bar'
+            });
+
+            // Flush out input field text state strings
+            inputField.value = '';
+            
+            renderCanvas();
+            fetchRecommendations(); // Instantly update Step 3 tracking side panels
+        }
+
+        function addWidget(id, name) {
+            if (currentDashboardWidgets.some(w => w.id === id)) return;
+            currentDashboardWidgets.push({ id: id, name: name, renderType: 'bar' });
+            renderCanvas();
+            fetchRecommendations();
+        }
+
+        function removeWidget(id) {
+            currentDashboardWidgets = currentDashboardWidgets.filter(w => w.id !== id);
+            renderCanvas();
+            fetchRecommendations();
+        }
+
+        function toggleWidgetVisualType(id, selectedType) {
+            const index = currentDashboardWidgets.findIndex(w => w.id === id);
+            if(index !== -1) {
+                currentDashboardWidgets[index].renderType = selectedType;
+                renderCanvas();
+            }
+        }
+
+        function generateDeterministicValue(nameString, offset = 0) {
+            let hash = 0;
+            for (let i = 0; i < nameString.length; i++) {
+                hash = nameString.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return Math.abs((hash + offset * 73) % 85) + 12;
+        }
+
+        function renderCanvas() {
+            const grid = document.getElementById('canvas-grid');
+            grid.innerHTML = '';
+
+            if (currentDashboardWidgets.length === 0) {
+                grid.innerHTML = '<div class="empty-hint"><h3>Dashboard Canvas workspace clear. Use the recommendations panel to inject components.</h3></div>';
+                return;
+            }
+
+            currentDashboardWidgets.forEach(w => {
+                const coreVal = generateDeterministicValue(w.name, 0);
+                let innerChartHTML = '';
+
+                let unit = w.name.toLowerCase().includes('rate') || w.name.toLowerCase().includes('volume') || w.name.toLowerCase().includes('count') ? 'req/s' : '%';
+                if (w.name.toLowerCase().includes('ms') || w.name.toLowerCase().includes('latency')) unit = 'ms';
+
+                if (w.renderType === 'pie') {
+                    innerChartHTML = `
+                        <div style="font-size: 13px; font-weight: bold; color: #94a3b8; text-transform: uppercase;">Allocation:</div>
+                        <div class="pie-chart-circle" style="background: conic-gradient(#38bdf8 0% ${coreVal}%, #334155 ${coreVal}% 100%);"></div>
+                        <div style="font-size:13px; font-weight:800; color:#38bdf8;">${coreVal}%</div>
+                    `;
+                } else if (w.renderType === 'kpi') {
+                    innerChartHTML = `
+                        <div style="display:flex; flex-direction:column; justify-content: center; height:100%;">
+                            <span style="font-size:11px; color:#475569; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">Current Value</span>
+                            <div class="kpi-value-text">${coreVal}<span class="kpi-unit">${unit}</span></div>
+                        </div>
+                        <div style="font-size: 11px; padding: 4px 8px; background: #10b9811c; color: #10b981; border-radius:4px; font-weight:bold;">● Live Stream</div>
+                    `;
+                } else {
+                    const bar1 = generateDeterministicValue(w.name, 1);
+                    const bar2 = generateDeterministicValue(w.name, 2);
+                    const bar3 = generateDeterministicValue(w.name, 3);
+                    const bar4 = coreVal; 
+                    innerChartHTML = `
+                        <div class="simplified-bar-container">
+                            <div class="chart-bar" style="height: ${bar1}%; opacity: 0.4;"></div>
+                            <div class="chart-bar" style="height: ${bar2}%; opacity: 0.6;"></div>
+                            <div class="chart-bar" style="height: ${bar3}%; opacity: 0.8;"></div>
+                            <div class="chart-bar" style="height: ${bar4} ..."></div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; justify-content:center; align-items:flex-end; min-width:65px;">
+                            <span style="font-size:10px; color:#475569; font-weight:bold; text-transform:uppercase;">Latest</span>
+                            <span style="font-size:18px; font-weight:800; color:#38bdf8;">${bar4}<span style="font-size:10px; color:#475569;">${unit}</span></span>
+                        </div>
+                    `;
+                }
+
+                grid.innerHTML += `
+                    <div class="widget-card">
+                        <button class="close-btn" onclick="removeWidget('${w.id}')">✕</button>
+                        <div>
+                            <span style="font-size:9px; color:#38bdf8; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Active Telemetry Feed</span>
+                            <h4 style="font-size:12px; margin-top:2px; color:#f8fafc; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${w.name}">${w.name}</h4>
+                        </div>
+                        
+                        <div class="chart-mock-box">
+                            ${innerChartHTML}
+                        </div>
+                        
+                        <div class="widget-controls">
+                            <span>intervals: 1m logs</span>
+                            <select class="type-select-mini" onchange="toggleWidgetVisualType('${w.id}', this.value)">
+                                <option value="bar" ${w.renderType === 'bar' ? 'selected' : ''}>View: 4-Bar Graph</option>
+                                <option value="pie" ${w.renderType === 'pie' ? 'selected' : ''}>View: Pie Chart</option>
+                                <option value="kpi" ${w.renderType === 'kpi' ? 'selected' : ''}>View: KPI Summary</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function fetchRecommendations() {
+            const panel = document.getElementById('recommendations-panel');
+            if(!activeCategoryTag) {
+                panel.innerHTML = '<div class="locked-placeholder">Awaiting Step 1 completion...</div>';
+                return;
+            }
+
+            const queryParams = currentDashboardWidgets.map(w => `widget_id=${w.id}`).join('&');
+            const res = await fetch(`http://127.0.0.1:8000/api/v1/recommendations?${queryParams}&category=${activeCategoryTag}`);
+            const data = await res.json();
+
+            panel.innerHTML = '';
+            if (!data.recommendations || data.recommendations.length === 0) {
+                panel.innerHTML = '<div style="text-align:center; color:#64748b; font-size:12px; margin-top:30px; font-style:italic;">No companion metrics discovered.</div>';
+                return;
+            }
+
+            data.recommendations.forEach(rec => {
+                panel.innerHTML += `
+                    <div class="amazon-rec-card">
+                        <span class="rec-badge">${rec.confidence}% Match</span>
+                        <div>
+                            <span style="font-size:9px; color:#38bdf8; font-weight:700; text-transform:uppercase;">Suggested Companion</span>
+                            <h5 style="font-size:12px; margin-top:3px; padding-right:65px; color:#f8fafc; line-height:1.4;">${rec.name}</h5>
+                            <p style="font-size:11px; color:#64748b; margin-top:5px; font-style:italic;">${rec.reason}</p>
+                        </div>
+                        <button class="btn-add-rec" onclick="addWidget('${rec.widget_id}', '${rec.name}')">Add Metric Component</button>
+                    </div>
+                `;
+            });
+        }
+
+        async function commitDashboardToDatabase() {
+            const name = document.getElementById('custom-dash-name').value.trim();
+            if(!name) { alert("Please input a valid dashboard configuration name!"); return; }
+            if(currentDashboardWidgets.length === 0) { alert("Cannot commit an empty layout configuration!"); return; }
+
+            const generatedId = "custom_" + name.toLowerCase().replace(/[^a-z0-9]/g, "_");
+            const widgetIds = currentDashboardWidgets.map(w => w.id);
+
+            await fetch('http://127.0.0.1:8000/api/v1/dashboards/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ template_id: generatedId, template_name: name, category_tag: activeCategoryTag, widgets: widgetIds })
+            });
+            
+            alert(`🚀 Success! Dashboard "${name}" registered into your master layout directory parameters.`);
+            await initStudio();
+            document.getElementById('template-select').value = generatedId;
+            document.getElementById('custom-dash-name').style.display = 'none';
+            document.getElementById('custom-dash-type-text').style.display = 'none';
+            document.getElementById('save-dash-btn').style.display = 'none';
+        }
+
+        window.onload = initStudio;
+    </script>
+</body>
+</html>
