@@ -30,6 +30,13 @@ def get_ui():
 def get_dashboards():
     conn = sqlite3.connect('metrics_engine.db')
     cursor = conn.cursor()
+    
+    # Check if dashboard_templates exists to prevent startup errors
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='dashboard_templates'")
+    if not cursor.fetchone():
+        conn.close()
+        return []
+        
     cursor.execute("SELECT template_id, template_name, category_tag FROM dashboard_templates")
     rows = cursor.fetchall()
     conn.close()
@@ -43,6 +50,7 @@ def get_dashboard_defaults(category: str, dashboard_name: Optional[str] = "Custo
     conn = sqlite3.connect('metrics_engine.db')
     cursor = conn.cursor()
     
+    # Check if widgets table has anything for this category tag
     cursor.execute("SELECT COUNT(*) FROM widgets WHERE category_tag = ?", (category,))
     if cursor.fetchone()[0] == 0:
         custom_widgets = [
@@ -55,7 +63,25 @@ def get_dashboard_defaults(category: str, dashboard_name: Optional[str] = "Custo
             cursor.execute("INSERT OR IGNORE INTO widgets VALUES (?, ?, ?)", w)
         conn.commit()
 
-    cursor.execute("SELECT widget_id, widget_name FROM widgets WHERE category_tag = ?", (category,))
+    # MODIFIED: Instead of just pulling blindly from widgets catalog, we cross-reference 
+    # the exact template relationships mapped out inside dashboard_defaults if a matching template exists.
+    derived_template_id = dashboard_name.lower().replace('.', '_').replace('-', '_').replace(' ', '_')
+    
+    cursor.execute("SELECT COUNT(*) FROM dashboard_defaults WHERE template_id = ?", (derived_template_id,))
+    has_defaults = cursor.fetchone()[0] > 0
+
+    if has_defaults:
+        # Pull specific mapped default choices for preset templates
+        cursor.execute("""
+            SELECT w.widget_id, w.widget_name 
+            FROM dashboard_defaults d
+            JOIN widgets w ON d.widget_id = w.widget_id
+            WHERE d.template_id = ?
+        """, (derived_template_id,))
+    else:
+        # Fall back to pulling items by general category tag matching for fresh typing options
+        cursor.execute("SELECT widget_id, widget_name FROM widgets WHERE category_tag = ?", (category,))
+        
     rows = cursor.fetchall()
     conn.close()
     return [{"widget_id": r[0], "name": r[1]} for r in rows]
@@ -77,7 +103,6 @@ def save_dashboard(payload: SaveDashboardPayload):
     finally:
         conn.close()
 
-# FIXED: Comprehensive Step 3 Recommender for all Preset & Custom Views
 @app.get("/api/v1/recommendations")
 def get_recommendations(widget_id: List[str] = Query(None), category: Optional[str] = None):
     if not category or category == "":
@@ -111,8 +136,7 @@ def get_recommendations(widget_id: List[str] = Query(None), category: Optional[s
                     })
                     seen_widget_ids.add(w_b_id)
 
-    # 2. FIXED DOMAIN RESOLUTION: Find ANY widgets in the catalog belonging to this dashboard's type
-    # that the user left unchecked during Step 2. Recommend them immediately!
+    # 2. Find any widgets in the catalog belonging to this dashboard's type that are unselected
     cursor.execute("SELECT widget_id, widget_name FROM widgets WHERE category_tag = ?", (category,))
     domain_widgets = cursor.fetchall()
     
@@ -129,8 +153,7 @@ def get_recommendations(widget_id: List[str] = Query(None), category: Optional[s
             seen_widget_ids.add(w_id)
             base_confidence -= 2.0  # Slightly lower confidence score for ranking variety
 
-    # 3. GLOBAL INFRASTRUCTURE CROSS-SELL: If the user added everything from that domain,
-    # suggest critical cross-platform server health pillars to ensure Step 3 is never blank
+    # 3. GLOBAL INFRASTRUCTURE CROSS-SELL: Fallback pillars so recommendation panel is never empty
     global_fallbacks = [
         ('widget_gen_cpu', 'Core Processor Load Utilization', 82.0, 'Global system CPU load context'),
         ('widget_gen_mem', 'Global Hardware Memory Allocation', 79.5, 'Global system RAM allocation profile'),
