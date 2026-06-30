@@ -11,7 +11,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -20,6 +20,10 @@ class SaveDashboardPayload(BaseModel):
     template_name: str
     category_tag: str
     widgets: List[str]
+
+class UpdateWidgetPayload(BaseModel):
+    widget_id: str
+    widget_name: str
 
 @app.get("/", response_class=HTMLResponse)
 def get_ui():
@@ -31,7 +35,6 @@ def get_dashboards():
     conn = sqlite3.connect('metrics_engine.db')
     cursor = conn.cursor()
     
-    # Check if dashboard_templates exists to prevent startup errors
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='dashboard_templates'")
     if not cursor.fetchone():
         conn.close()
@@ -42,6 +45,62 @@ def get_dashboards():
     conn.close()
     return [{"id": r[0], "name": r[1], "category": r[2]} for r in rows]
 
+@app.get("/api/v1/dashboards/recently-deleted")
+def get_recently_deleted_dashboards():
+    conn = sqlite3.connect('metrics_engine.db')
+    cursor = conn.cursor()
+    query = """
+        SELECT DISTINCT d.template_id 
+        FROM dashboard_defaults d
+        LEFT JOIN dashboard_templates t ON d.template_id = t.template_id
+        WHERE t.template_id IS NULL
+    """
+    cursor.execute(query)
+    ids = [row[0] for row in cursor.fetchall()]
+    
+    deleted_profiles = []
+    for t_id in ids:
+        guessed_name = t_id.replace('custom_', '').replace('_', ' ').title()
+        category = "server"
+        if "aws" in t_id or "amazon" in t_id: category = "aws"
+        elif "k8s" in t_id or "kubernetes" in t_id: category = "kubernetes"
+        elif "net" in t_id or "cisco" in t_id: category = "network"
+        deleted_profiles.append({"id": t_id, "name": guessed_name, "category": category})
+        
+    conn.close()
+    return deleted_profiles
+
+@app.post("/api/v1/dashboards/restore/{template_id}")
+def restore_dashboard(template_id: str, payload: dict):
+    conn = sqlite3.connect('metrics_engine.db')
+    cursor = conn.cursor()
+    try:
+        cursor.execute("INSERT OR REPLACE INTO dashboard_templates VALUES (?, ?, ?)", 
+                       (template_id, payload.get("name", "Restored View"), payload.get("category", "server")))
+        conn.commit()
+        return {"status": "success"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
+
+@app.put("/api/v1/widgets/update")
+def update_widget_details(payload: UpdateWidgetPayload):
+    conn = sqlite3.connect('metrics_engine.db')
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE widgets SET widget_name = ? WHERE widget_id = ?", (payload.widget_name, payload.widget_id))
+        
+        if cursor.rowcount == 0:
+            cursor.execute("INSERT OR IGNORE INTO widgets VALUES (?, ?, 'general')", (payload.widget_id, payload.widget_name))
+            
+        conn.commit()
+        return {"status": "success"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
+
 @app.get("/api/v1/dashboard-defaults")
 def get_dashboard_defaults(category: str, dashboard_name: Optional[str] = "Custom"):
     if not category or category == "undefined":
@@ -49,40 +108,44 @@ def get_dashboard_defaults(category: str, dashboard_name: Optional[str] = "Custo
     
     conn = sqlite3.connect('metrics_engine.db')
     cursor = conn.cursor()
-    
-    # Check if widgets table has anything for this category tag
-    cursor.execute("SELECT COUNT(*) FROM widgets WHERE category_tag = ?", (category,))
-    if cursor.fetchone()[0] == 0:
-        custom_widgets = [
-            (f"widget_{category}_traffic", f"{dashboard_name} Traffic Volume", category),
-            (f"widget_{category}_latency", f"{dashboard_name} Response Latency (ms)", category),
-            (f"widget_{category}_errors", f"{dashboard_name} Error Rate (%)", category),
-            (f"widget_{category}_success", f"{dashboard_name} Transaction Success Core Index", category)
-        ]
-        for w in custom_widgets:
-            cursor.execute("INSERT OR IGNORE INTO widgets VALUES (?, ?, ?)", w)
-        conn.commit()
-
-    # MODIFIED: Instead of just pulling blindly from widgets catalog, we cross-reference 
-    # the exact template relationships mapped out inside dashboard_defaults if a matching template exists.
     derived_template_id = dashboard_name.lower().replace('.', '_').replace('-', '_').replace(' ', '_')
     
     cursor.execute("SELECT COUNT(*) FROM dashboard_defaults WHERE template_id = ?", (derived_template_id,))
     has_defaults = cursor.fetchone()[0] > 0
 
     if has_defaults:
-        # Pull specific mapped default choices for preset templates
         cursor.execute("""
             SELECT w.widget_id, w.widget_name 
             FROM dashboard_defaults d
             JOIN widgets w ON d.widget_id = w.widget_id
             WHERE d.template_id = ?
         """, (derived_template_id,))
+        rows = cursor.fetchall()
     else:
-        # Fall back to pulling items by general category tag matching for fresh typing options
         cursor.execute("SELECT widget_id, widget_name FROM widgets WHERE category_tag = ?", (category,))
+        rows = cursor.fetchall()
         
-    rows = cursor.fetchall()
+        if len(rows) == 0:
+            clean_name = dashboard_name.replace('_', ' ').replace('-', ' ')
+            custom_widgets = [
+                (f"widget_{derived_template_id}_health", f"{clean_name} Core Node Health Index", category),
+                (f"widget_{derived_template_id}_load", f"{clean_name} Resource Load Multiplier", category),
+                (f"widget_{derived_template_id}_latency", f"{clean_name} Processing Latency Profile (ms)", category),
+                (f"widget_{derived_template_id}_throughput", f"{clean_name} Request Ingestion Throughput", category)
+            ]
+            for w in custom_widgets:
+                cursor.execute("INSERT OR IGNORE INTO widgets VALUES (?, ?, ?)", w)
+                cursor.execute("INSERT OR IGNORE INTO dashboard_defaults VALUES (?, ?)", (derived_template_id, w[0]))
+            conn.commit()
+            
+            cursor.execute("""
+                SELECT w.widget_id, w.widget_name 
+                FROM dashboard_defaults d
+                JOIN widgets w ON d.widget_id = w.widget_id
+                WHERE d.template_id = ?
+            """, (derived_template_id,))
+            rows = cursor.fetchall()
+        
     conn.close()
     return [{"widget_id": r[0], "name": r[1]} for r in rows]
 
@@ -103,6 +166,19 @@ def save_dashboard(payload: SaveDashboardPayload):
     finally:
         conn.close()
 
+@app.delete("/api/v1/dashboards/delete/{template_id}")
+def delete_dashboard(template_id: str):
+    conn = sqlite3.connect('metrics_engine.db')
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM dashboard_templates WHERE template_id = ?", (template_id,))
+        conn.commit()
+        return {"status": "success"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
+
 @app.get("/api/v1/recommendations")
 def get_recommendations(widget_id: List[str] = Query(None), category: Optional[str] = None):
     if not category or category == "":
@@ -110,11 +186,9 @@ def get_recommendations(widget_id: List[str] = Query(None), category: Optional[s
 
     conn = sqlite3.connect('metrics_engine.db')
     cursor = conn.cursor()
-    
     compiled_recs = []
     seen_widget_ids = set(widget_id) if widget_id else set()
 
-    # 1. Look for explicit co-occurrence mappings if items are on the canvas
     if widget_id:
         for active_w in widget_id:
             cursor.execute("""
@@ -124,7 +198,6 @@ def get_recommendations(widget_id: List[str] = Query(None), category: Optional[s
                 JOIN widgets aw ON r.widget_a_id = aw.widget_id
                 WHERE r.widget_a_id = ?
             """, (active_w,))
-            
             for row in cursor.fetchall():
                 w_b_id, w_b_name, conf, w_a_name = row
                 if w_b_id not in seen_widget_ids:
@@ -136,10 +209,8 @@ def get_recommendations(widget_id: List[str] = Query(None), category: Optional[s
                     })
                     seen_widget_ids.add(w_b_id)
 
-    # 2. Find any widgets in the catalog belonging to this dashboard's type that are unselected
     cursor.execute("SELECT widget_id, widget_name FROM widgets WHERE category_tag = ?", (category,))
     domain_widgets = cursor.fetchall()
-    
     base_confidence = 94.0
     for row in domain_widgets:
         w_id, w_name = row
@@ -151,9 +222,8 @@ def get_recommendations(widget_id: List[str] = Query(None), category: Optional[s
                 "reason": f"Unselected target companion for {category} environments"
             })
             seen_widget_ids.add(w_id)
-            base_confidence -= 2.0  # Slightly lower confidence score for ranking variety
+            base_confidence -= 2.0  
 
-    # 3. GLOBAL INFRASTRUCTURE CROSS-SELL: Fallback pillars so recommendation panel is never empty
     global_fallbacks = [
         ('widget_gen_cpu', 'Core Processor Load Utilization', 82.0, 'Global system CPU load context'),
         ('widget_gen_mem', 'Global Hardware Memory Allocation', 79.5, 'Global system RAM allocation profile'),
@@ -169,7 +239,6 @@ def get_recommendations(widget_id: List[str] = Query(None), category: Optional[s
                 "reason": f"Infrastructure baseline: {reason_text}"
             })
 
-    # Sort everything uniformly by confidence score percentage
     compiled_recs = sorted(compiled_recs, key=lambda x: x['confidence'], reverse=True)
     conn.close()
     return {"recommendations": compiled_recs[:6]}

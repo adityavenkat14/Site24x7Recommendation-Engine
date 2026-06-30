@@ -16,14 +16,18 @@
         .btn-custom { background: #0284c7; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
         .btn-save { background: #10b981; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
         
-        /* Permanent Add Button Style */
         .btn-direct-add { background: #6366f1; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.15s; }
         .btn-direct-add:hover { background: #4f46e5; }
 
-        /* Plus Button Widget Creation Style Block */
-        .widget-injector-wrap { display: flex; align-items: center; gap: 6px; background: #0f172a; border: 1px dashed #0284c7; padding: 4px; border-radius: 8px; }
-        .btn-plus-add { background: #0284c7; color: white; border: none; width: 32px; height: 32px; border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.15s; }
-        .btn-plus-add:hover { background: #0ea5e9; }
+        .search-container-wrapper { position: relative; width: 220px; }
+        .search-results-floating-panel { position: absolute; top: calc(100% + 6px); left: 0; width: 100%; background: #1e293b; border: 1px solid #334155; border-radius: 6px; max-height: 280px; overflow-y: auto; display: none; z-index: 1000; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
+        .search-item-row { padding: 8px 14px; font-size: 12px; color: #cbd5e1; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.1s; }
+        .search-item-row:hover { background: #334155; color: #f8fafc; }
+        .search-delete-x-btn { background: none; border: none; color: #64748b; font-weight: bold; font-size: 12px; padding: 2px 6px; cursor: pointer; border-radius: 4px; transition: 0.1s; }
+        .search-delete-x-btn:hover { background: #f43f5e1a; color: #f43f5e; }
+        
+        .search-trash-trigger-option { padding: 8px 14px; font-size: 11px; font-weight: bold; color: #f59e0b; text-align: center; border-top: 1px solid #334155; background: #1e293b; cursor: pointer; }
+        .search-trash-trigger-option:hover { background: #f59e0b1c; }
 
         .main-frame { display: flex; flex: 1; overflow: hidden; }
         .workspace-center { flex: 1; display: flex; flex-direction: column; background: #090d16; overflow: hidden; }
@@ -34,7 +38,10 @@
         .checkbox-container { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; cursor: pointer; background: #312e81; padding: 6px 12px; border-radius: 6px; border: 1px solid #4338ca; white-space: nowrap; }
         .btn-bundle { background: #38bdf8; color: #0f172a; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 800; cursor: pointer; margin-left: auto; }
 
-        .canvas-grid { flex: 1; padding: 25px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; align-content: flex-start; }
+        .workspace-title-header-bar { padding: 15px 25px 0 25px; display: none; align-items: center; gap: 10px; }
+        .active-dashboard-pill-badge { background: #38bdf824; border: 1px solid #38bdf84d; color: #38bdf8; font-weight: 700; font-size: 13px; padding: 6px 14px; border-radius: 20px; letter-spacing: 0.3px; }
+
+        .canvas-grid { flex: 1; padding: 20px 25px 25px 25px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; align-content: flex-start; }
         .step1-lock-hint { grid-column: 1/-1; text-align: center; color: #475569; margin-top: 150px; background: #111827; padding: 40px; border-radius: 12px; border: 2px dashed #1e293b; max-width: 600px; margin-left: auto; margin-right: auto; }
         .empty-hint { grid-column: 1/-1; text-align: center; color: #475569; margin-top: 100px; }
         
@@ -42,6 +49,9 @@
         .close-btn { position: absolute; top: 12px; right: 12px; background: none; border: none; color: #64748b; cursor: pointer; font-size: 14px; font-weight: bold; }
         .close-btn:hover { color: #f43f5e; }
         
+        .editable-widget-heading { font-size:12px; margin-top:2px; color:#f8fafc; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor: pointer; padding: 2px 4px; border-radius: 4px; transition: background 0.15s; }
+        .editable-widget-heading:hover { background: #334155; color: #38bdf8; }
+
         .chart-mock-box { height: 80px; background: #0f172a; border-radius: 6px; display: flex; align-items: center; justify-content: space-around; padding: 10px; border: 1px solid #1e293b; overflow: hidden; }
         .simplified-bar-container { display: flex; align-items: flex-end; justify-content: center; gap: 16px; width: 100%; height: 100%; padding-top: 5px; }
         .chart-bar { width: 24px; background: linear-gradient(to top, #0284c7, #38bdf8); border-radius: 4px 4px 0 0; min-height: 6px; }
@@ -64,46 +74,44 @@
         .btn-add-rec { background: #f59e0b; color: #0f172a; border: none; width: 100%; padding: 8px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; margin-top: 5px; }
         
         .locked-placeholder { text-align: center; color: #475569; font-size: 13px; font-style: italic; margin-top: 40px; padding: 20px; }
+        .widget-rename-input { font-size:12px; font-weight:600; color:#f8fafc; background:#0f172a; border:1px solid #38bdf8; border-radius:4px; padding:2px 6px; width:100%; outline:none; box-shadow: 0 0 0 2px #38bdf830; }
+        .widget-rename-input:focus { border-color:#7dd3fc; }
     </style>
 </head>
 <body>
 
     <nav>
-        <div class="logo">⚡ Site24x7 Recommendation Engine</div>
+        <div class="logo">⚡ Site24x7 Multi-Stage Recommendation Engine</div>
         <div class="nav-actions">
             <input type="text" id="custom-dash-name" placeholder="Enter Dashboard Name..." style="display:none; width:180px;">
             <input type="text" id="custom-dash-type-text" placeholder="Type (e.g., shopping)..." style="display:none; width:160px;">
             <button class="btn-save" id="save-dash-btn" style="display:none;" onclick="commitDashboardToDatabase()">💾 Save Layout Config</button>
             <button class="btn-custom" id="custom-init-btn" onclick="activateCustomFlowUI()">➕ Custom Dashboard</button>
-            
             <button class="btn-direct-add" id="direct-add-widget-btn" onclick="promptAndInjectCustomWidget()">✨ Add Custom Metric</button>
-
-            <div class="widget-injector-wrap" id="manual-widget-injector" style="display: none;">
-                <input type="text" id="manual-widget-name" placeholder="Custom Widget Name..." style="border: none; padding: 6px 10px; font-size: 12px; width: 160px;">
-                <button class="btn-plus-add" onclick="injectManualCustomWidget()" title="Add Custom Widget Entirely">+</button>
+            <div class="search-container-wrapper">
+                <input type="text" id="dashboard-search-bar" placeholder="🔍 Search dashboards..." oninput="handleSearchFiltering(this.value)" onfocus="showSearchResultsPanel()" autocomplete="off">
+                <div class="search-results-floating-panel" id="search-dropdown-panel"></div>
             </div>
-
-            <select id="template-select" onchange="executeStep1TemplateWorkflow()">
-            </select>
         </div>
     </nav>
 
     <div class="main-frame">
         <div class="workspace-center">
-            
             <div class="bundle-banner" id="bundle-banner">
                 <div class="bundle-title" id="bundle-banner-title">Step 2: Recommended Default Starter Options</div>
                 <div class="bundle-options" id="bundle-options-container"></div>
             </div>
-
+            <div class="workspace-title-header-bar" id="workspace-active-title-bar">
+                <span style="font-size: 11px; color: #475569; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Active Workspace Context:</span>
+                <div class="active-dashboard-pill-badge" id="active-dashboard-display-name">None Selected</div>
+            </div>
             <div class="canvas-grid" id="canvas-grid">
                 <div class="step1-lock-hint" id="canvas-lock-message">
                     <h3 style="color:#94a3b8; margin-bottom: 8px;">🔒 Workspace Locked</h3>
-                    <p style="font-size:13px; color:#475569;">Step 1 Prerequisite Missing: Please select a baseline template dropdown or initiate a custom layout config profile above to unlock workflow tracks.</p>
+                    <p style="font-size:13px; color:#475569;">Step 1 Prerequisite Missing: Please type to search/select a baseline dashboard template or initiate a custom layout config profile above to unlock workflow tracks.</p>
                 </div>
             </div>
         </div>
-
         <div class="sidebar-right">
             <div class="sidebar-header">💡 Step 3: Adaptive Cross-Pairings</div>
             <div class="rec-container" id="recommendations-panel">
@@ -114,63 +122,195 @@
 
     <script>
         let currentDashboardWidgets = [];
-        let fetchedDefaultsBuffer = [];
-        let activeCategoryTag = "";
-        let customDebounceTimer = null;
+        let fetchedDefaultsBuffer   = [];
+        let activeCategoryTag       = "";
+        let customDebounceTimer     = null;
+        let loadedDashboardProfilesMaster = [];
+
+        function escAttr(val) {
+            return String(val).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function escHTML(val) {
+            return String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
 
         async function initStudio() {
             const res = await fetch('http://127.0.0.1:8000/api/v1/dashboards');
-            const data = await res.json();
-            const select = document.getElementById('template-select');
-            select.innerHTML = '<option value="" disabled selected>Or choose a baseline template...</option>';
-            data.forEach(d => {
-                select.innerHTML += `<option value="${d.id}" data-category="${d.category}">${d.name}</option>`;
-            });
+            loadedDashboardProfilesMaster = await res.json();
+            handleSearchFiltering("");
             document.getElementById('recommendations-panel').innerHTML = '<div class="locked-placeholder">Awaiting Step 1 completion...</div>';
         }
 
+        function handleSearchFiltering(searchQuery) {
+            const panel      = document.getElementById('search-dropdown-panel');
+            const cleanQuery = searchQuery.trim().toLowerCase();
+            const filtered   = loadedDashboardProfilesMaster.filter(d => d.name.toLowerCase().includes(cleanQuery));
+
+            let html = '';
+            filtered.forEach(d => {
+                html += `
+                    <div class="search-item-row" onclick="selectDashboardFromSearch('${escAttr(d.id)}', '${escAttr(d.category)}')">
+                        <span>${escHTML(d.name)}</span>
+                        <button class="search-delete-x-btn" onclick="removeDashboardFromDatabase(event, '${escAttr(d.id)}')" title="Delete Permanent Template">✕</button>
+                    </div>`;
+            });
+            html += `<div class="search-trash-trigger-option" onclick="toggleRecentlyDeletedView(event)">📂 View Recently Deleted Archetypes</div>`;
+            panel.innerHTML = html;
+        }
+
+        function showSearchResultsPanel() {
+            document.getElementById('search-dropdown-panel').style.display = 'block';
+            handleSearchFiltering(document.getElementById('dashboard-search-bar').value);
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-container-wrapper')) {
+                document.getElementById('search-dropdown-panel').style.display = 'none';
+            }
+        });
+
+        async function toggleRecentlyDeletedView(event) {
+            event.stopPropagation();
+            const panel = document.getElementById('search-dropdown-panel');
+            const res   = await fetch('http://127.0.0.1:8000/api/v1/dashboards/recently-deleted');
+            const items = await res.json();
+
+            if (items.length === 0) {
+                panel.innerHTML = `
+                    <div style="padding:15px; font-size:11px; color:#64748b; text-align:center; font-style:italic;">No historical hidden logs discovered.</div>
+                    <div class="search-trash-trigger-option" onclick="handleSearchFiltering('')">⬅ Back to Active Catalog</div>`;
+                return;
+            }
+
+            let html = '<div style="padding: 8px 14px; font-size:10px; font-weight:bold; color:#f59e0b; background:#1e1b4b;">RESTOREABLE LAYOUTS:</div>';
+            items.forEach(d => {
+                html += `
+                    <div class="search-item-row" style="border-left: 2px solid #f59e0b;" onclick="restoreDashboardProfile('${escAttr(d.id)}', '${escAttr(d.name)}', '${escAttr(d.category)}')">
+                        <span>🔄 ${escHTML(d.name)}</span>
+                        <span style="font-size:9px; background:#475569; padding:2px 4px; border-radius:4px; color:#94a3b8;">${escHTML(d.category)}</span>
+                    </div>`;
+            });
+            html += `<div class="search-trash-trigger-option" onclick="handleSearchFiltering('')">⬅ Back to Active Catalog</div>`;
+            panel.innerHTML = html;
+        }
+
+        async function restoreDashboardProfile(templateId, name, category) {
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboards/restore/${templateId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, category })
+                });
+                const data = await res.json();
+                if (data.status === "success") {
+                    alert(`Restored layout tracking vectors for: "${name}"`);
+                    await initStudio();
+                    selectDashboardFromSearch(templateId, category);
+                }
+            } catch (err) {
+                alert("Failed to communicate with restore pipeline: " + err);
+            }
+        }
+
+        async function selectDashboardFromSearch(templateId, category) {
+            const profile   = loadedDashboardProfilesMaster.find(d => d.id === templateId);
+            const chosenName = profile ? profile.name : "Custom View";
+
+            document.getElementById('dashboard-search-bar').value      = chosenName;
+            document.getElementById('search-dropdown-panel').style.display = 'none';
+            activeCategoryTag = category;
+
+            document.getElementById('custom-dash-name').style.display      = 'none';
+            document.getElementById('custom-dash-type-text').style.display  = 'none';
+            document.getElementById('save-dash-btn').style.display          = 'none';
+
+            const titleBar = document.getElementById('workspace-active-title-bar');
+            document.getElementById('active-dashboard-display-name').innerText = `📊 ${chosenName}`;
+            titleBar.style.display = 'flex';
+
+            document.getElementById('recommendations-panel').innerHTML = '<div class="locked-placeholder">Loading workspace tracking state...</div>';
+
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboard-defaults?category=${category}&dashboard_name=${encodeURIComponent(chosenName)}`);
+                fetchedDefaultsBuffer = await res.json();
+
+                if (fetchedDefaultsBuffer && fetchedDefaultsBuffer.length > 0) {
+                    currentDashboardWidgets = fetchedDefaultsBuffer.map(item => ({
+                        id: item.widget_id, name: item.name, renderType: 'bar'
+                    }));
+                    document.getElementById('bundle-banner').style.display = 'none';
+                    renderCanvas();
+                    fetchRecommendations();
+                } else {
+                    document.getElementById('bundle-banner-title').innerText = `Step 2: Mapped Core Suggestions for "${chosenName}"`;
+                    renderStep2BundleBanner();
+                }
+            } catch (err) {
+                console.error("Error loading saved layout tracks:", err);
+                triggerStep2Fetch(activeCategoryTag, chosenName);
+            }
+        }
+
+        async function removeDashboardFromDatabase(event, templateId) {
+            event.stopPropagation();
+            const profile    = loadedDashboardProfilesMaster.find(d => d.id === templateId);
+            const chosenName = profile ? profile.name : "Selected Profile";
+
+            if (!confirm(`Are you absolutely sure you want to permanently delete "${chosenName}"?`)) return;
+
+            try {
+                const res    = await fetch(`http://127.0.0.1:8000/api/v1/dashboards/delete/${templateId}`, { method: 'DELETE' });
+                const result = await res.json();
+
+                if (result && result.status === "success") {
+                    alert(`Successfully deleted "${chosenName}" from active registry directories.`);
+                    document.getElementById('dashboard-search-bar').value = '';
+                    currentDashboardWidgets = [];
+                    activeCategoryTag = "";
+                    renderCanvas();
+                    document.getElementById('bundle-banner').style.display = 'none';
+                    document.getElementById('workspace-active-title-bar').style.display = 'none';
+                    document.getElementById('recommendations-panel').innerHTML = '<div class="locked-placeholder">Awaiting Step 1 completion...</div>';
+                    await initStudio();
+                } else {
+                    alert("Error updating target layout configurations: " + (result.message || "Unknown error"));
+                }
+            } catch (err) {
+                alert("Server infrastructure tracking pipeline error: " + err);
+            }
+        }
+
         function activateCustomFlowUI() {
-            document.getElementById('template-select').value = "";
-            document.getElementById('bundle-banner').style.display = 'none';
-            document.getElementById('manual-widget-injector').style.display = 'none'; 
-            
-            document.getElementById('custom-dash-name').style.display = 'block';
-            document.getElementById('custom-dash-name').value = '';
+            document.getElementById('dashboard-search-bar').value          = "";
+            document.getElementById('bundle-banner').style.display         = 'none';
+            document.getElementById('workspace-active-title-bar').style.display = 'none';
+            document.getElementById('custom-dash-name').style.display      = 'block';
+            document.getElementById('custom-dash-name').value              = '';
             document.getElementById('custom-dash-type-text').style.display = 'block';
-            document.getElementById('custom-dash-type-text').value = '';
-            document.getElementById('save-dash-btn').style.display = 'block';
-            
+            document.getElementById('custom-dash-type-text').value         = '';
+            document.getElementById('save-dash-btn').style.display         = 'block';
+
             document.getElementById('custom-dash-type-text').oninput = function() {
                 clearTimeout(customDebounceTimer);
                 customDebounceTimer = setTimeout(() => {
-                    let textVal = this.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
-                    let dashName = document.getElementById('custom-dash-name').value.trim() || "Custom Dashboard";
-                    activeCategoryTag = textVal ? textVal : "general";
+                    const textVal  = this.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
+                    const dashName = document.getElementById('custom-dash-name').value.trim() || "Custom Dashboard";
+                    activeCategoryTag = textVal || "general";
+
+                    const titleBar = document.getElementById('workspace-active-title-bar');
+                    document.getElementById('active-dashboard-display-name').innerText = `🛠️ ${dashName} (${activeCategoryTag})`;
+                    titleBar.style.display = 'flex';
+
                     triggerStep2Fetch(activeCategoryTag, dashName);
                 }, 400);
             };
         }
 
-        async function executeStep1TemplateWorkflow() {
-            const selectEl = document.getElementById('template-select');
-            const selectedOption = selectEl.options[selectEl.selectedIndex];
-            activeCategoryTag = selectedOption.getAttribute('data-category');
-            const chosenName = selectedOption.text;
-            
-            document.getElementById('custom-dash-name').style.display = 'none';
-            document.getElementById('custom-dash-type-text').style.display = 'none';
-            document.getElementById('save-dash-btn').style.display = 'none';
-            document.getElementById('manual-widget-injector').style.display = 'none';
-
-            triggerStep2Fetch(activeCategoryTag, chosenName);
-        }
-
         async function triggerStep2Fetch(category, dashboardDisplayName) {
             document.getElementById('recommendations-panel').innerHTML = '<div class="locked-placeholder">Awaiting Step 2 confirmation...</div>';
-
             const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboard-defaults?category=${category}&dashboard_name=${encodeURIComponent(dashboardDisplayName)}`);
             fetchedDefaultsBuffer = await res.json();
-
             document.getElementById('bundle-banner-title').innerText = `Step 2: Mapped Core Suggestions for "${dashboardDisplayName}"`;
             renderStep2BundleBanner();
         }
@@ -178,8 +318,6 @@
         function renderStep2BundleBanner() {
             const banner = document.getElementById('bundle-banner');
             const container = document.getElementById('bundle-options-container');
-            
-            let generatedContent = '';
 
             if (!fetchedDefaultsBuffer || fetchedDefaultsBuffer.length === 0) {
                 container.innerHTML = '<span style="font-size:12px; color:#94a3b8;">Type a context name to load starter tracks...</span>';
@@ -187,108 +325,138 @@
                 return;
             }
 
+            let html = '';
             fetchedDefaultsBuffer.forEach((item, index) => {
-                generatedContent += `
+                html += `
                     <label class="checkbox-container">
-                        <input type="checkbox" id="chk-def-${index}" value="${item.widget_id}" data-name="${item.name}" checked>
-                        <span>${item.name}</span>
-                    </label>
-                `;
+                        <input type="checkbox" id="chk-def-${index}" value="${escAttr(item.widget_id)}" data-name="${escAttr(item.name)}" checked>
+                        <span>${escHTML(item.name)}</span>
+                    </label>`;
             });
-
-            generatedContent += `<button class="btn-bundle" onclick="applyStep2Selections()">Apply Checked Components</button>`;
-            container.innerHTML = generatedContent;
+            html += `<button class="btn-bundle" onclick="applyStep2Selections()">Apply Checked Components</button>`;
+            container.innerHTML = html;
             banner.style.display = 'flex';
         }
 
         function applyStep2Selections() {
-            currentDashboardWidgets = []; 
-            
+            currentDashboardWidgets = [];
             fetchedDefaultsBuffer.forEach((item, index) => {
                 const chk = document.getElementById(`chk-def-${index}`);
                 if (chk && chk.checked) {
                     currentDashboardWidgets.push({ id: item.widget_id, name: item.name, renderType: 'bar' });
                 }
             });
-
             document.getElementById('bundle-banner').style.display = 'none';
-            document.getElementById('manual-widget-injector').style.display = 'flex';
-            document.getElementById('manual-widget-name').value = '';
-            
             renderCanvas();
             fetchRecommendations();
         }
 
-        /* NEW: Standalone Prompt Dialog Injection Handler */
         function promptAndInjectCustomWidget() {
             const customName = prompt("Enter a unique title for your custom metric widget:");
-            if (customName === null) return; // User pressed cancel
-            
-            const trimmedName = customName.trim();
-            if (!trimmedName) {
-                alert("Metric widget names cannot be blank!");
-                return;
-            }
-
-            // Fallback default context setup if canvas hasn't been initialized by template workflows
-            if (!activeCategoryTag) {
-                activeCategoryTag = "general";
-            }
-
-            const uniqueId = "manual_widget_" + Date.now();
-            currentDashboardWidgets.push({
-                id: uniqueId,
-                name: trimmedName,
-                renderType: 'bar'
-            });
-
+            if (customName === null) return;
+            const trimmed = customName.trim();
+            if (!trimmed) { alert("Metric widget names cannot be blank!"); return; }
+            if (!activeCategoryTag) activeCategoryTag = "general";
+            currentDashboardWidgets.push({ id: "manual_widget_" + Date.now(), name: trimmed, renderType: 'bar' });
             renderCanvas();
             fetchRecommendations();
-        }
-
-        function injectManualCustomWidget() {
-            const inputField = document.getElementById('manual-widget-name');
-            const customName = inputField.value.trim();
-            
-            if(!customName) {
-                alert("Please enter a name for your custom metric widget!");
-                return;
-            }
-
-            const uniqueId = "manual_widget_" + Date.now();
-            currentDashboardWidgets.push({
-                id: uniqueId,
-                name: customName,
-                renderType: 'bar'
-            });
-
-            inputField.value = '';
-            renderCanvas();
-            fetchRecommendations(); 
         }
 
         function addWidget(id, name) {
             if (currentDashboardWidgets.some(w => w.id === id)) return;
-            currentDashboardWidgets.push({ id: id, name: name, renderType: 'bar' });
+            currentDashboardWidgets.push({ id, name, renderType: 'bar' });
             renderCanvas();
             fetchRecommendations();
         }
 
-        function removeWidget(id) {
-            currentDashboardWidgets = currentDashboardWidgets.filter(w => w.id !== id);
+        function removeWidget(index) {
+            currentDashboardWidgets.splice(index, 1);
             renderCanvas();
             fetchRecommendations();
         }
 
-        function toggleWidgetVisualType(id, selectedType) {
-            const index = currentDashboardWidgets.findIndex(w => w.id === id);
-            if(index !== -1) {
+        function toggleWidgetVisualType(index, selectedType) {
+            if (currentDashboardWidgets[index]) {
                 currentDashboardWidgets[index].renderType = selectedType;
                 renderCanvas();
             }
         }
 
-        function generateDeterministicValue(nameString, offset = 0) {
+        // 💡 FIXED: Resolved the dual loop race condition challenge completely
+        function triggerInlineWidgetRename(index) {
+            const cards = document.getElementById('canvas-grid').querySelectorAll('.widget-card');
+            const card  = cards[index];
+            if (!card) return;
+
+            const heading = card.querySelector('.editable-widget-heading');
+            if (!heading) return;
+
+            const currentName = currentDashboardWidgets[index].name;
+
+            const input = document.createElement('input');
+            input.type      = 'text';
+            input.value     = currentName;
+            input.className = 'widget-rename-input';
+            heading.replaceWith(input);
+            input.focus();
+            input.select();
+
+            let committed = false;
+
+            function commitRename(save) {
+                if (committed) return;
+                committed = true;
+
+                const clean = save ? input.value.trim() : '';
+                const newHeading = document.createElement('h4');
+                newHeading.className  = 'editable-widget-heading';
+                newHeading.title      = 'Double click to rename metric widget';
+                newHeading.ondblclick = () => triggerInlineWidgetRename(index);
+
+                if (!clean) {
+                    newHeading.textContent = currentName;
+                    input.replaceWith(newHeading);
+                    return;
+                }
+
+                currentDashboardWidgets[index].name = clean;
+                newHeading.textContent = clean;
+                input.replaceWith(newHeading);
+
+                fetch('http://127.0.0.1:8000/api/v1/widgets/update', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ widget_id: currentDashboardWidgets[index].id, widget_name: clean })
+                })
+                .then(r => r.json())
+                .then(result => {
+                    if (result && result.status === "success") {
+                        fetchRecommendations();
+                    } else {
+                        console.error("DB widget name sync failed:", result && result.message);
+                    }
+                })
+                .catch(e => console.error("Widget update request failed:", e));
+            }
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter')  { 
+                    e.preventDefault(); 
+                    e.stopPropagation(); // Stop parent DOM bubble reloads
+                    commitRename(true); 
+                }
+                if (e.key === 'Escape') { 
+                    e.preventDefault(); 
+                    commitRename(false); 
+                }
+            });
+
+            input.addEventListener('blur', function() { 
+                commitRename(true); 
+            });
+        }
+
+        function generateDeterministicValue(nameString, offset) {
             let hash = 0;
             for (let i = 0; i < nameString.length; i++) {
                 hash = nameString.charCodeAt(i) + ((hash << 5) - hash);
@@ -305,27 +473,32 @@
                 return;
             }
 
-            currentDashboardWidgets.forEach(w => {
+            currentDashboardWidgets.forEach((w, index) => {
                 const coreVal = generateDeterministicValue(w.name, 0);
                 let innerChartHTML = '';
-
-                let unit = w.name.toLowerCase().includes('rate') || w.name.toLowerCase().includes('volume') || w.name.toLowerCase().includes('count') ? 'req/s' : '%';
-                if (w.name.toLowerCase().includes('ms') || w.name.toLowerCase().includes('latency')) unit = 'ms';
+                
+                let unit = '%';
+                if (w.name && typeof w.name === 'string') {
+                    const lowerName = w.name.toLowerCase();
+                    if (lowerName.includes('rate') || lowerName.includes('volume') || lowerName.includes('count')) {
+                        unit = 'req/s';
+                    } else if (lowerName.includes('ms') || lowerName.includes('latency') || lowerName.includes('time')) {
+                        unit = 'ms';
+                    }
+                }
 
                 if (w.renderType === 'pie') {
                     innerChartHTML = `
                         <div style="font-size: 13px; font-weight: bold; color: #94a3b8; text-transform: uppercase;">Allocation:</div>
                         <div class="pie-chart-circle" style="background: conic-gradient(#38bdf8 0% ${coreVal}%, #334155 ${coreVal}% 100%);"></div>
-                        <div style="font-size:13px; font-weight:800; color:#38bdf8;">${coreVal}%</div>
-                    `;
+                        <div style="font-size:13px; font-weight:800; color:#38bdf8;">${coreVal}%</div>`;
                 } else if (w.renderType === 'kpi') {
                     innerChartHTML = `
                         <div style="display:flex; flex-direction:column; justify-content: center; height:100%;">
                             <span style="font-size:11px; color:#475569; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">Current Value</span>
                             <div class="kpi-value-text">${coreVal}<span class="kpi-unit">${unit}</span></div>
                         </div>
-                        <div style="font-size: 11px; padding: 4px 8px; background: #10b9811c; color: #10b981; border-radius:4px; font-weight:bold;">● Live Stream</div>
-                    `;
+                        <div style="font-size: 11px; padding: 4px 8px; background: #10b9811c; color: #10b981; border-radius:4px; font-weight:bold;">● Live Stream</div>`;
                 } else {
                     const bar1 = generateDeterministicValue(w.name, 1);
                     const bar2 = generateDeterministicValue(w.name, 2);
@@ -341,87 +514,122 @@
                         <div style="display:flex; flex-direction:column; justify-content:center; align-items:flex-end; min-width:65px;">
                             <span style="font-size:10px; color:#475569; font-weight:bold; text-transform:uppercase;">Latest</span>
                             <span style="font-size:18px; font-weight:800; color:#38bdf8;">${bar4}<span style="font-size:10px; color:#475569;">${unit}</span></span>
-                        </div>
-                    `;
+                        </div>`;
                 }
 
-                grid.innerHTML += `
-                    <div class="widget-card">
-                        <button class="close-btn" onclick="removeWidget('${w.id}')">✕</button>
-                        <div>
-                            <span style="font-size:9px; color:#38bdf8; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Active Telemetry Feed</span>
-                            <h4 style="font-size:12px; margin-top:2px; color:#f8fafc; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${w.name}">${w.name}</h4>
-                        </div>
-                        
-                        <div class="chart-mock-box">
-                            ${innerChartHTML}
-                        </div>
-                        
-                        <div class="widget-controls">
-                            <span>intervals: 1m logs</span>
-                            <select class="type-select-mini" onchange="toggleWidgetVisualType('${w.id}', this.value)">
-                                <option value="bar" ${w.renderType === 'bar' ? 'selected' : ''}>View: 4-Bar Graph</option>
-                                <option value="pie" ${w.renderType === 'pie' ? 'selected' : ''}>View: Pie Chart</option>
-                                <option value="kpi" ${w.renderType === 'kpi' ? 'selected' : ''}>View: KPI Summary</option>
-                            </select>
-                        </div>
-                    </div>
-                `;
+                const card = document.createElement('div');
+                card.className = 'widget-card';
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'close-btn';
+                deleteBtn.innerText = '✕';
+                deleteBtn.addEventListener('click', () => removeWidget(index));
+                card.appendChild(deleteBtn);
+
+                const headerWrapper = document.createElement('div');
+                headerWrapper.innerHTML = `<span style="font-size:9px; color:#38bdf8; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Active Telemetry Feed</span>`;
+                
+                const titleHeading = document.createElement('h4');
+                titleHeading.className = 'editable-widget-heading';
+                titleHeading.title = 'Double click to rename metric widget';
+                titleHeading.innerText = w.name || "Unnamed Metric"; 
+                titleHeading.addEventListener('dblclick', () => triggerInlineWidgetRename(index));
+                
+                headerWrapper.appendChild(titleHeading);
+                card.appendChild(headerWrapper);
+
+                const chartBox = document.createElement('div');
+                chartBox.className = 'chart-mock-box';
+                chartBox.innerHTML = innerChartHTML;
+                card.appendChild(chartBox);
+
+                const controlsWrapper = document.createElement('div');
+                controlsWrapper.className = 'widget-controls';
+                controlsWrapper.innerHTML = `<span>intervals: 1m logs</span>`;
+
+                const typeSelect = document.createElement('select');
+                typeSelect.className = 'type-select-mini';
+                typeSelect.innerHTML = `
+                    <option value="bar" ${w.renderType === 'bar' ? 'selected' : ''}>View: 4-Bar Graph</option>
+                    <option value="pie" ${w.renderType === 'pie' ? 'selected' : ''}>View: Pie Chart</option>
+                    <option value="kpi" ${w.renderType === 'kpi' ? 'selected' : ''}>View: KPI Summary</option>`;
+                typeSelect.addEventListener('change', (e) => toggleWidgetVisualType(index, e.target.value));
+                
+                controlsWrapper.appendChild(typeSelect);
+                card.appendChild(controlsWrapper);
+
+                grid.appendChild(card);
             });
         }
 
-        async function fetchRecommendations() {
-            const panel = document.getElementById('recommendations-panel');
-            if(!activeCategoryTag) {
-                panel.innerHTML = '<div class="locked-placeholder">Awaiting Step 1 completion...</div>';
-                return;
-            }
+        // FIXED: Wrapped the lookup process inside error-isolation scopes so side-panel slips can NEVER blank the grid workspace
+async function fetchRecommendations() {
+    const panel = document.getElementById('recommendations-panel');
+    if (!activeCategoryTag) {
+        panel.innerHTML = '<div class="locked-placeholder">Awaiting Step 1 completion...</div>';
+        return;
+    }
 
-            const queryParams = currentDashboardWidgets.map(w => `widget_id=${w.id}`).join('&');
-            const res = await fetch(`http://127.0.0.1:8000/api/v1/recommendations?${queryParams}&category=${activeCategoryTag}`);
-            const data = await res.json();
+    try {
+        const queryParams = currentDashboardWidgets.map(w => `widget_id=${encodeURIComponent(w.id)}`).join('&');
+        const res = await fetch(`http://127.0.0.1:8000/api/v1/recommendations?${queryParams}&category=${activeCategoryTag}`);
 
-            panel.innerHTML = '';
-            if (!data.recommendations || data.recommendations.length === 0) {
-                panel.innerHTML = '<div style="text-align:center; color:#64748b; font-size:12px; margin-top:30px; font-style:italic;">No companion metrics discovered.</div>';
-                return;
-            }
-
-            data.recommendations.forEach(rec => {
-                panel.innerHTML += `
-                    <div class="amazon-rec-card">
-                        <span class="rec-badge">${rec.confidence}% Match</span>
-                        <div>
-                            <span style="font-size:9px; color:#38bdf8; font-weight:700; text-transform:uppercase;">Suggested Companion</span>
-                            <h5 style="font-size:12px; margin-top:3px; padding-right:65px; color:#f8fafc; line-height:1.4;">${rec.name}</h5>
-                            <p style="font-size:11px; color:#64748b; margin-top:5px; font-style:italic;">${rec.reason}</p>
-                        </div>
-                        <button class="btn-add-rec" onclick="addWidget('${rec.widget_id}', '${rec.name}')">Add Metric Component</button>
-                    </div>
-                `;
-            });
+        if (!res.ok) {
+            panel.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px; margin-top:20px; font-style:italic;">Adaptive side metrics syncing...</div>';
+            return;
         }
+
+        const data = await res.json();
+        if (!data.recommendations || data.recommendations.length === 0) {
+            panel.innerHTML = '<div style="text-align:center; color:#64748b; font-size:12px; margin-top:30px; font-style:italic;">No companion metrics discovered.</div>';
+            return;
+        }
+
+        let html = '';
+        data.recommendations.forEach(rec => {
+            html += `
+                <div class="amazon-rec-card">
+                    <span class="rec-badge">${rec.confidence}% Match</span>
+                    <div>
+                        <span style="font-size:9px; color:#38bdf8; font-weight:700; text-transform:uppercase;">Suggested Companion</span>
+                        <h5 style="font-size:12px; margin-top:3px; padding-right:65px; color:#f8fafc; line-height:1.4;">${escHTML(rec.name)}</h5>
+                        <p style="font-size:11px; color:#64748b; margin-top:5px; font-style:italic;">${escHTML(rec.reason)}</p>
+                    </div>
+                    <button class="btn-add-rec" onclick="addWidget('${escAttr(rec.widget_id)}', '${escAttr(rec.name)}')">Add Metric Component</button>
+                </div>`;
+        });
+        panel.innerHTML = html;
+
+    } catch (error) {
+        // Safe container recovery fallback to completely absorb data synchronization faults
+        console.error("Shielded recommendation panel trace caught safely:", error);
+        panel.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px; margin-top:20px; font-style:italic;">Adaptive metrics updating...</div>';
+    }
+}
 
         async function commitDashboardToDatabase() {
             const name = document.getElementById('custom-dash-name').value.trim();
-            if(!name) { alert("Please input a valid dashboard configuration name!"); return; }
-            if(currentDashboardWidgets.length === 0) { alert("Cannot commit an empty layout configuration!"); return; }
+            if (!name) { alert("Please input a valid dashboard configuration name!"); return; }
+            if (currentDashboardWidgets.length === 0) { alert("Cannot commit an empty layout configuration!"); return; }
 
             const generatedId = "custom_" + name.toLowerCase().replace(/[^a-z0-9]/g, "_");
-            const widgetIds = currentDashboardWidgets.map(w => w.id);
+            const widgetIds   = currentDashboardWidgets.map(w => w.id);
 
             await fetch('http://127.0.0.1:8000/api/v1/dashboards/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ template_id: generatedId, template_name: name, category_tag: activeCategoryTag, widgets: widgetIds })
             });
-            
+
             alert(`🚀 Success! Dashboard "${name}" registered into your master layout directory parameters.`);
             await initStudio();
-            document.getElementById('template-select').value = generatedId;
-            document.getElementById('custom-dash-name').style.display = 'none';
+
+            document.getElementById('dashboard-search-bar').value = name;
+            document.getElementById('active-dashboard-display-name').innerText = `📊 ${name}`;
+            document.getElementById('workspace-active-title-bar').style.display = 'flex';
+            document.getElementById('custom-dash-name').style.display      = 'none';
             document.getElementById('custom-dash-type-text').style.display = 'none';
-            document.getElementById('save-dash-btn').style.display = 'none';
+            document.getElementById('save-dash-btn').style.display         = 'none';
         }
 
         window.onload = initStudio;
