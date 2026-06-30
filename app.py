@@ -92,7 +92,7 @@ def update_widget_details(payload: UpdateWidgetPayload):
         cursor.execute("UPDATE widgets SET widget_name = ? WHERE widget_id = ?", (payload.widget_name, payload.widget_id))
         
         if cursor.rowcount == 0:
-            cursor.execute("INSERT OR IGNORE INTO widgets VALUES (?, ?, 'general')", (payload.widget_id, payload.widget_name))
+            cursor.execute("INSERT OR IGNORE INTO widgets VALUES (?, ?, 'general')", (payload.widget_id, payload.payload.widget_name))
             
         conn.commit()
         return {"status": "success"}
@@ -101,6 +101,7 @@ def update_widget_details(payload: UpdateWidgetPayload):
     finally:
         conn.close()
 
+# CHANGED: Prioritizes layout records over static fallbacks so updates reflect instantly
 @app.get("/api/v1/dashboard-defaults")
 def get_dashboard_defaults(category: str, dashboard_name: Optional[str] = "Custom"):
     if not category or category == "undefined":
@@ -110,6 +111,7 @@ def get_dashboard_defaults(category: str, dashboard_name: Optional[str] = "Custo
     cursor = conn.cursor()
     derived_template_id = dashboard_name.lower().replace('.', '_').replace('-', '_').replace(' ', '_')
     
+    # Check if a custom layout or modified version exists in dashboard_defaults mapping first
     cursor.execute("SELECT COUNT(*) FROM dashboard_defaults WHERE template_id = ?", (derived_template_id,))
     has_defaults = cursor.fetchone()[0] > 0
 
@@ -122,6 +124,7 @@ def get_dashboard_defaults(category: str, dashboard_name: Optional[str] = "Custo
         """, (derived_template_id,))
         rows = cursor.fetchall()
     else:
+        # Fallback to general domain defaults only if no active user configuration has been saved yet
         cursor.execute("SELECT widget_id, widget_name FROM widgets WHERE category_tag = ?", (category,))
         rows = cursor.fetchall()
         

@@ -7,6 +7,13 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { display: flex; flex-direction: column; height: 100vh; background-color: #0f172a; color: #f8fafc; overflow: hidden; }
         
+        .auth-overlay-backdrop { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #090d16fa; display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .auth-card-frame { background: #1e293b; border: 1px solid #334155; border-radius: 12px; width: 360px; padding: 30px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.7); display: flex; flex-direction: column; gap: 18px; }
+        .auth-input-group { display: flex; flex-direction: column; gap: 6px; }
+        .auth-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-login-submit { background: #6366f1; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.15s; margin-top: 10px; }
+        .btn-login-submit:hover { background: #4f46e5; }
+        
         nav { background: #1e293b; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; }
         .logo { font-weight: 700; font-size: 14px; color: #38bdf8; text-transform: uppercase; letter-spacing: 1px; }
         .nav-actions { display: flex; gap: 12px; align-items: center; }
@@ -15,6 +22,8 @@
         
         .btn-custom { background: #0284c7; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
         .btn-save { background: #10b981; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .btn-logout { background: #f43f5e1c; color: #f43f5e; border: 1px solid #f43f5e4d; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .btn-logout:hover { background: #f43f5e; color: white; }
         
         .btn-direct-add { background: #6366f1; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.15s; }
         .btn-direct-add:hover { background: #4f46e5; }
@@ -126,6 +135,9 @@
         let activeCategoryTag       = "";
         let customDebounceTimer     = null;
         let loadedDashboardProfilesMaster = [];
+        // NEW: Track the currently loaded workspace parameters safely
+        let activeDashboardId       = "";
+        let activeDashboardName     = "";
 
         function escAttr(val) {
             return String(val).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -220,10 +232,16 @@
             document.getElementById('dashboard-search-bar').value      = chosenName;
             document.getElementById('search-dropdown-panel').style.display = 'none';
             activeCategoryTag = category;
+            
+            // CHANGED: Cache active references
+            activeDashboardId   = templateId;
+            activeDashboardName = chosenName;
 
             document.getElementById('custom-dash-name').style.display      = 'none';
             document.getElementById('custom-dash-type-text').style.display  = 'none';
-            document.getElementById('save-dash-btn').style.display          = 'none';
+            
+            // CHANGED: Expose the configuration saving mechanism immediately
+            document.getElementById('save-dash-btn').style.display          = 'block';
 
             const titleBar = document.getElementById('workspace-active-title-bar');
             document.getElementById('active-dashboard-display-name').innerText = `📊 ${chosenName}`;
@@ -268,9 +286,12 @@
                     document.getElementById('dashboard-search-bar').value = '';
                     currentDashboardWidgets = [];
                     activeCategoryTag = "";
+                    activeDashboardId = "";
+                    activeDashboardName = "";
                     renderCanvas();
                     document.getElementById('bundle-banner').style.display = 'none';
                     document.getElementById('workspace-active-title-bar').style.display = 'none';
+                    document.getElementById('save-dash-btn').style.display = 'none';
                     document.getElementById('recommendations-panel').innerHTML = '<div class="locked-placeholder">Awaiting Step 1 completion...</div>';
                     await initStudio();
                 } else {
@@ -290,6 +311,9 @@
             document.getElementById('custom-dash-type-text').style.display = 'block';
             document.getElementById('custom-dash-type-text').value         = '';
             document.getElementById('save-dash-btn').style.display         = 'block';
+            
+            activeDashboardId   = "";
+            activeDashboardName = "";
 
             document.getElementById('custom-dash-type-text').oninput = function() {
                 clearTimeout(customDebounceTimer);
@@ -382,7 +406,6 @@
             }
         }
 
-        // 💡 FIXED: Resolved the dual loop race condition challenge completely
         function triggerInlineWidgetRename(index) {
             const cards = document.getElementById('canvas-grid').querySelectorAll('.widget-card');
             const card  = cards[index];
@@ -442,7 +465,7 @@
             input.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter')  { 
                     e.preventDefault(); 
-                    e.stopPropagation(); // Stop parent DOM bubble reloads
+                    e.stopPropagation(); 
                     commitRename(true); 
                 }
                 if (e.key === 'Escape') { 
@@ -562,58 +585,67 @@
             });
         }
 
-        // FIXED: Wrapped the lookup process inside error-isolation scopes so side-panel slips can NEVER blank the grid workspace
-async function fetchRecommendations() {
-    const panel = document.getElementById('recommendations-panel');
-    if (!activeCategoryTag) {
-        panel.innerHTML = '<div class="locked-placeholder">Awaiting Step 1 completion...</div>';
-        return;
-    }
+        async function fetchRecommendations() {
+            const panel = document.getElementById('recommendations-panel');
+            if (!activeCategoryTag) {
+                panel.innerHTML = '<div class="locked-placeholder">Awaiting Step 1 completion...</div>';
+                return;
+            }
 
-    try {
-        const queryParams = currentDashboardWidgets.map(w => `widget_id=${encodeURIComponent(w.id)}`).join('&');
-        const res = await fetch(`http://127.0.0.1:8000/api/v1/recommendations?${queryParams}&category=${activeCategoryTag}`);
+            try {
+                const queryParams = currentDashboardWidgets.map(w => `widget_id=${encodeURIComponent(w.id)}`).join('&');
+                const res = await fetch(`http://127.0.0.1:8000/api/v1/recommendations?${queryParams}&category=${activeCategoryTag}`);
 
-        if (!res.ok) {
-            panel.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px; margin-top:20px; font-style:italic;">Adaptive side metrics syncing...</div>';
-            return;
+                if (!res.ok) {
+                    panel.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px; margin-top:20px; font-style:italic;">Adaptive side metrics syncing...</div>';
+                    return;
+                }
+
+                const data = await res.json();
+                if (!data.recommendations || data.recommendations.length === 0) {
+                    panel.innerHTML = '<div style="text-align:center; color:#64748b; font-size:12px; margin-top:30px; font-style:italic;">No companion metrics discovered.</div>';
+                    return;
+                }
+
+                let html = '';
+                data.recommendations.forEach(rec => {
+                    html += `
+                        <div class="amazon-rec-card">
+                            <span class="rec-badge">${rec.confidence}% Match</span>
+                            <div>
+                                <span style="font-size:9px; color:#38bdf8; font-weight:700; text-transform:uppercase;">Suggested Companion</span>
+                                <h5 style="font-size:12px; margin-top:3px; padding-right:65px; color:#f8fafc; line-height:1.4;">${escHTML(rec.name)}</h5>
+                                <p style="font-size:11px; color:#64748b; margin-top:5px; font-style:italic;">${escHTML(rec.reason)}</p>
+                            </div>
+                            <button class="btn-add-rec" onclick="addWidget('${escAttr(rec.widget_id)}', '${escAttr(rec.name)}')">Add Metric Component</button>
+                        </div>`;
+                });
+                panel.innerHTML = html;
+
+            } catch (error) {
+                console.error("Recommendation fetch error:", error);
+                panel.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px; margin-top:20px; font-style:italic;">Adaptive metrics updating...</div>';
+            }
         }
 
-        const data = await res.json();
-        if (!data.recommendations || data.recommendations.length === 0) {
-            panel.innerHTML = '<div style="text-align:center; color:#64748b; font-size:12px; margin-top:30px; font-style:italic;">No companion metrics discovered.</div>';
-            return;
-        }
-
-        let html = '';
-        data.recommendations.forEach(rec => {
-            html += `
-                <div class="amazon-rec-card">
-                    <span class="rec-badge">${rec.confidence}% Match</span>
-                    <div>
-                        <span style="font-size:9px; color:#38bdf8; font-weight:700; text-transform:uppercase;">Suggested Companion</span>
-                        <h5 style="font-size:12px; margin-top:3px; padding-right:65px; color:#f8fafc; line-height:1.4;">${escHTML(rec.name)}</h5>
-                        <p style="font-size:11px; color:#64748b; margin-top:5px; font-style:italic;">${escHTML(rec.reason)}</p>
-                    </div>
-                    <button class="btn-add-rec" onclick="addWidget('${escAttr(rec.widget_id)}', '${escAttr(rec.name)}')">Add Metric Component</button>
-                </div>`;
-        });
-        panel.innerHTML = html;
-
-    } catch (error) {
-        // Safe container recovery fallback to completely absorb data synchronization faults
-        console.error("Shielded recommendation panel trace caught safely:", error);
-        panel.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px; margin-top:20px; font-style:italic;">Adaptive metrics updating...</div>';
-    }
-}
-
+        // CHANGED: Intelligently dynamically updates existing dashboards or inserts new custom entries
         async function commitDashboardToDatabase() {
-            const name = document.getElementById('custom-dash-name').value.trim();
-            if (!name) { alert("Please input a valid dashboard configuration name!"); return; }
+            let name = "";
+            let generatedId = "";
+            
+            if (activeDashboardId) {
+                // Updating an already loaded dashboard configuration
+                name = activeDashboardName;
+                generatedId = activeDashboardId;
+            } else {
+                // Saving a newly initialized custom tracking block
+                name = document.getElementById('custom-dash-name').value.trim();
+                if (!name) { alert("Please input a valid dashboard configuration name!"); return; }
+                generatedId = "custom_" + name.toLowerCase().replace(/[^a-z0-9]/g, "_");
+            }
+            
             if (currentDashboardWidgets.length === 0) { alert("Cannot commit an empty layout configuration!"); return; }
-
-            const generatedId = "custom_" + name.toLowerCase().replace(/[^a-z0-9]/g, "_");
-            const widgetIds   = currentDashboardWidgets.map(w => w.id);
+            const widgetIds = currentDashboardWidgets.map(w => w.id);
 
             await fetch('http://127.0.0.1:8000/api/v1/dashboards/save', {
                 method: 'POST',
@@ -621,7 +653,7 @@ async function fetchRecommendations() {
                 body: JSON.stringify({ template_id: generatedId, template_name: name, category_tag: activeCategoryTag, widgets: widgetIds })
             });
 
-            alert(`🚀 Success! Dashboard "${name}" registered into your master layout directory parameters.`);
+            alert(`🚀 Success! Dashboard "${name}" configuration maps updated smoothly.`);
             await initStudio();
 
             document.getElementById('dashboard-search-bar').value = name;
@@ -629,7 +661,10 @@ async function fetchRecommendations() {
             document.getElementById('workspace-active-title-bar').style.display = 'flex';
             document.getElementById('custom-dash-name').style.display      = 'none';
             document.getElementById('custom-dash-type-text').style.display = 'none';
-            document.getElementById('save-dash-btn').style.display         = 'none';
+            
+            // Retain active tracking state parameters
+            activeDashboardId   = generatedId;
+            activeDashboardName = name;
         }
 
         window.onload = initStudio;
