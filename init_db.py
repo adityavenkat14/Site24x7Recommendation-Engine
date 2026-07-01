@@ -1,6 +1,11 @@
 import sqlite3
 
 def init_db():
+    # ⚠️  DESTRUCTIVE: this drops and recreates every table, including
+    # dashboard_defaults and dashboard_templates. Running this against a
+    # database that already has real saved user dashboards will permanently
+    # delete them. Treat this as a dev/reset tool only -- never run it
+    # against a live deployment's metrics_engine.db.
     conn = sqlite3.connect('metrics_engine.db')
     cursor = conn.cursor()
 
@@ -8,8 +13,17 @@ def init_db():
     for t in tables: cursor.execute(f"DROP TABLE IF EXISTS {t}")
 
     cursor.execute('CREATE TABLE widgets (widget_id TEXT PRIMARY KEY, widget_name TEXT, category_tag TEXT)')
-    cursor.execute('CREATE TABLE dashboard_templates (template_id TEXT PRIMARY KEY, template_name TEXT, category_tag TEXT)')
-    cursor.execute('CREATE TABLE dashboard_defaults (template_id TEXT, widget_id TEXT, PRIMARY KEY(template_id, widget_id))')
+    cursor.execute('CREATE TABLE dashboard_templates (template_id TEXT PRIMARY KEY, template_name TEXT, category_tag TEXT, username TEXT DEFAULT "global_default")')
+    # BUGFIX: uniqueness now includes username. The old PRIMARY KEY(template_id, widget_id)
+    # made it impossible for two different users (or a global-default seed row) to ever
+    # have the same widget in the same dashboard -- saves would fail with a UNIQUE
+    # constraint error the moment a user tried to save a widget already used by anyone else.
+    cursor.execute('''CREATE TABLE dashboard_defaults (
+        template_id TEXT,
+        widget_id TEXT,
+        username TEXT DEFAULT 'global_default',
+        UNIQUE(template_id, widget_id, username)
+    )''')
     cursor.execute('CREATE TABLE rec_co_occurrence (widget_a_id TEXT, widget_b_id TEXT, confidence_score REAL, PRIMARY KEY(widget_a_id, widget_b_id))')
 
     # 1. Master list of ALL 19 dashboards from your original files list
@@ -34,7 +48,7 @@ def init_db():
         ('web_trans_browser', 'web transaction monitor(browser)', 'web'),
         ('webpage_speed', 'webpage speed', 'web')
     ]
-    cursor.executemany('INSERT INTO dashboard_templates VALUES (?, ?, ?)', templates)
+    cursor.executemany('INSERT INTO dashboard_templates (template_id, template_name, category_tag) VALUES (?, ?, ?)', templates)
 
     # 2. Master Metrics Catalog for ALL types of infrastructure
     widgets = [
@@ -100,7 +114,7 @@ def init_db():
         matching_widgets = [w[0] for w in widgets if w[2] == cat]
         # Map the first 4 matching metrics as the Step 2 bundle defaults for this dashboard
         for w_id in matching_widgets[:4]:
-            cursor.execute('INSERT INTO dashboard_defaults VALUES (?, ?)', (t_id, w_id))
+            cursor.execute('INSERT INTO dashboard_defaults (template_id, widget_id, username) VALUES (?, ?, ?)', (t_id, w_id, 'global_default'))
 
     # 4. Step 3 Core Association Rules Cross-Pairing Matrix
     rules = [

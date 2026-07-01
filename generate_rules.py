@@ -19,8 +19,8 @@ def train_engine():
               .count().unstack().reset_index().fillna(0)
               .set_index('dashboard_id'))
     
-    # Ensure it's strictly 1s and 0s
-    basket_sets = basket.map(lambda x: 1 if x > 0 else 0)
+    # Ensure it's a proper boolean matrix (mlxtend deprecates non-bool dtypes)
+    basket_sets = (basket > 0)
     
     # 3. Find frequent widget combinations using the Apriori algorithm
     frequent_itemsets = apriori(basket_sets, min_support=0.1, use_colnames=True)
@@ -37,8 +37,8 @@ def train_engine():
             for con in row['consequents']:
                 cursor.execute('''
                     INSERT OR REPLACE INTO rec_co_occurrence 
-                    VALUES (?, ?, ?, ?)
-                ''', (ant, con, float(row['support']), float(row['confidence'])))
+                    VALUES (?, ?, ?)
+                ''', (ant, con, float(row['confidence'])))
                 
     conn.commit()
     conn.close()

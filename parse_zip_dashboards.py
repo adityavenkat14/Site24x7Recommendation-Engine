@@ -21,8 +21,16 @@ def scan_all_19_dashboards():
     # FIXED: Removed the DROP TABLE loop to protect existing data structures from disappearing.
     # Instead, we safely initialize the schemas only if they do not exist.
     cursor.execute('CREATE TABLE IF NOT EXISTS widgets (widget_id TEXT PRIMARY KEY, widget_name TEXT, category_tag TEXT)')
-    cursor.execute('CREATE TABLE IF NOT EXISTS dashboard_templates (template_id TEXT PRIMARY KEY, template_name TEXT, category_tag TEXT)')
-    cursor.execute('CREATE TABLE IF NOT EXISTS dashboard_defaults (template_id TEXT, widget_id TEXT, PRIMARY KEY(template_id, widget_id))')
+    cursor.execute('CREATE TABLE IF NOT EXISTS dashboard_templates (template_id TEXT PRIMARY KEY, template_name TEXT, category_tag TEXT, username TEXT DEFAULT "global_default")')
+    # BUGFIX: matches app.py's migrated schema. The old PRIMARY KEY(template_id, widget_id)
+    # blocked any per-user widget save that collided with a global/seed row for the same
+    # dashboard+widget pair.
+    cursor.execute('''CREATE TABLE IF NOT EXISTS dashboard_defaults (
+        template_id TEXT,
+        widget_id TEXT,
+        username TEXT DEFAULT 'global_default',
+        UNIQUE(template_id, widget_id, username)
+    )''')
     cursor.execute('CREATE TABLE IF NOT EXISTS rec_co_occurrence (widget_a_id TEXT, widget_b_id TEXT, confidence_score REAL, PRIMARY KEY(widget_a_id, widget_b_id))')
 
     image_extensions = ('.png', '.jpg', '.jpeg', '.webp')
@@ -53,7 +61,7 @@ def scan_all_19_dashboards():
         elif "web" in template_id or "browser" in template_id: category = "web"
 
         print(f"\n📂 Scanning Dashboard File Bundle [{all_zip_files.index(zip_file)+1}/{len(all_zip_files)}]: {template_name}")
-        cursor.execute("INSERT OR REPLACE INTO dashboard_templates VALUES (?, ?, ?)", (template_id, template_name, category))
+        cursor.execute("INSERT OR REPLACE INTO dashboard_templates (template_id, template_name, category_tag) VALUES (?, ?, ?)", (template_id, template_name, category))
 
         try:
             with zipfile.ZipFile(zip_file, 'r') as archive:
@@ -90,7 +98,10 @@ def scan_all_19_dashboards():
                 for widget_name in unique_widgets:
                     widget_id = "widget_" + widget_name.lower().replace(' ', '_').replace('/', '_').replace('%', '')
                     cursor.execute("INSERT OR REPLACE INTO widgets VALUES (?, ?, ?)", (widget_id, widget_name, category))
-                    cursor.execute("INSERT OR REPLACE INTO dashboard_defaults VALUES (?, ?)", (template_id, widget_id))
+                    cursor.execute(
+                        "INSERT OR REPLACE INTO dashboard_defaults (template_id, widget_id, username) VALUES (?, ?, ?)",
+                        (template_id, widget_id, 'global_default')
+                    )
 
         except Exception as e:
             print(f"   ⚠️ Skipping damaged or unreadable file element: {zip_file}. Error: {e}")
