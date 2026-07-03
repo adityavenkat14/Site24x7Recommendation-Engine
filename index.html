@@ -26,17 +26,13 @@
             --shadow: 0 2px 8px rgba(0,0,0,0.07);
             --shadow-lg: 0 8px 32px rgba(0,0,0,0.14);
         }
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; height: 100vh; background-color: var(--bg); color: var(--text); overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; display: flex; flex-direction: column; height: 100vh; background-color: var(--bg); color: var(--text); overflow: hidden; }
 
-        /* ─── AUTH OVERLAY ─────────────────────────────── */
         .auth-overlay-backdrop { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(10,14,26,0.72); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
         .auth-card-frame { background: var(--card); border: 1px solid var(--border); border-radius: 14px; width: 380px; padding: 34px; box-shadow: var(--shadow-lg); display: flex; flex-direction: column; gap: 18px; }
-        .auth-input-group { display: flex; flex-direction: column; gap: 6px; }
-        .auth-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
         .btn-login-submit { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.15s; margin-top: 10px; font-family: inherit; }
         .btn-login-submit:hover { background: var(--primary-hover); }
 
-        /* ─── NAV ───────────────────────────────────────── */
         nav { background: var(--nav); height: 52px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.3); z-index: 200; }
         .logo { font-weight: 700; font-size: 13px; color: #7fa4d0; letter-spacing: 0.3px; }
         .nav-actions { display: flex; gap: 12px; align-items: center; }
@@ -44,13 +40,9 @@
         .btn-logout:hover { background: var(--down); color: white; }
 
         select, input { background: #fff; color: var(--text); border: 1.5px solid var(--border); padding: 8px 13px; border-radius: 8px; font-size: 13px; font-weight: 500; outline: none; font-family: inherit; }
-        input::placeholder { color: #a7b2c6; }
         select:focus, input:focus { border-color: var(--primary); }
 
-        /* ─── LAYOUT ────────────────────────────────────── */
         .main-frame { display: flex; flex: 1; overflow: hidden; }
-
-        /* ─── LEFT SIDEBAR: SEARCH / TEMPLATES ─────────── */
         .sidebar-left { width: 270px; background: var(--sidebar); display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden; }
         .sidebar-hd { padding: 16px 16px 12px; border-bottom: 1px solid rgba(255,255,255,.07); }
         .sidebar-hd-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.1px; color: #7fa4d0; font-weight: 700; }
@@ -58,20 +50,9 @@
 
         .search-container-wrapper { position: relative; width: 100%; }
         #dashboard-search-bar { width: 100%; background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.12); color: #eaf0fb; padding: 9px 13px; }
-        #dashboard-search-bar::placeholder { color: #64789e; }
         #dashboard-search-bar:focus { border-color: var(--primary); background: rgba(255,255,255,.1); }
 
-        .search-results-floating-panel {
-            /* docked list styling — kept as a normal flow block instead of a floating dropdown */
-            position: static !important;
-            display: block !important;
-            width: 100%;
-            background: transparent !important;
-            border: none !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            max-height: none;
-        }
+        .search-results-floating-panel { position: static !important; display: block !important; width: 100%; background: transparent !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; }
         .sidebar-scrl { overflow-y: auto; flex: 1; padding: 6px 0; }
 
         .search-item-row { padding: 9px 16px; font-size: 12.5px; color: #ccd9ef; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid transparent; transition: background .15s; }
@@ -88,21 +69,16 @@
         .btn-custom { background: rgba(255,255,255,.06); color: #cfdcf5; border: 1.5px solid rgba(255,255,255,.16); padding: 9px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 500; cursor: pointer; font-family: inherit; transition: 0.15s; width: 100%; text-align: left; }
         .btn-custom:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.3); }
         .btn-direct-add { background: linear-gradient(135deg,#7c3aed,#2066e4); color: white; border: none; padding: 9px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.15s; font-family: inherit; width: 100%; }
-        .btn-direct-add:hover { filter: brightness(1.08); }
         .btn-save { background: var(--up); color: white; border: none; padding: 9px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit; width: 100%; }
-        .btn-save:hover { background: #148a4d; }
 
         #custom-dash-name, #custom-dash-type-text { width: 100%; }
 
-        /* ─── CENTER: BUILDER / MATRIX ─────────────────── */
         .workspace-center { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
-
-        .bundle-banner { background: var(--card); border-bottom: 1px solid var(--border); padding: 18px 24px; display: none; flex-direction: column; gap: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+        .bundle-banner { background: var(--card); border-bottom: 1px solid var(--border); padding: 18px 24px; display: none; flex-direction: column; gap: 12px; }
         .bundle-title { font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.6px; }
         .bundle-options { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; max-height: 120px; overflow-y: auto; padding: 3px; }
         .checkbox-container { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 500; cursor: pointer; background: var(--primary-light); color: var(--primary); padding: 7px 13px; border-radius: 20px; border: 1.5px solid rgba(32,102,228,0.25); white-space: nowrap; }
         .btn-bundle { background: var(--primary); color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; margin-left: auto; font-family: inherit; }
-        .btn-bundle:hover { background: var(--primary-hover); }
 
         .workspace-title-header-bar { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 24px; display: none; align-items: center; gap: 10px; flex-shrink: 0; }
         .active-dashboard-pill-badge { background: var(--primary-light); border: 1.5px solid rgba(32,102,228,0.25); color: var(--primary); font-weight: 700; font-size: 13px; padding: 6px 14px; border-radius: 20px; letter-spacing: 0.3px; }
@@ -111,84 +87,63 @@
         .step1-lock-hint { grid-column: 1/-1; text-align: center; color: var(--muted); margin-top: 90px; background: var(--card); padding: 44px; border-radius: 14px; border: 2px dashed var(--border); max-width: 600px; margin-left: auto; margin-right: auto; }
         .empty-hint { grid-column: 1/-1; text-align: center; color: var(--muted); margin-top: 100px; }
 
-        .widget-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px; position: relative; height: 185px; display: flex; flex-direction: column; justify-content: space-between; transition: border-color .15s, box-shadow .15s; }
-        .widget-card:hover { border-color: var(--primary); box-shadow: var(--shadow); }
-        .close-btn { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 50%; background: none; border: none; color: #c3cbd9; cursor: pointer; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; transition: 0.15s; }
+        .widget-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px; position: relative; height: 185px; display: flex; flex-direction: column; justify-content: space-between; }
+        .close-btn { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 50%; background: none; border: none; color: #c3cbd9; cursor: pointer; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
         .close-btn:hover { color: #fff; background: var(--down); }
 
-        .editable-widget-heading { font-size:12.5px; margin-top:2px; color:var(--text); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor: pointer; padding: 3px 5px; border-radius: 5px; transition: background 0.15s; }
+        .editable-widget-heading { font-size:12.5px; margin-top:2px; color:var(--text); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor: pointer; padding: 3px 5px; border-radius: 5px; }
         .editable-widget-heading:hover { background: var(--primary-light); color: var(--primary); }
 
         .chart-mock-box { height: 80px; background: var(--bg); border-radius: 8px; display: flex; align-items: center; justify-content: space-around; padding: 10px; border: 1px solid var(--border); overflow: hidden; }
         .simplified-bar-container { display: flex; align-items: flex-end; justify-content: center; gap: 16px; width: 100%; height: 100%; padding-top: 5px; }
-        .chart-bar { width: 22px; background: linear-gradient(to top, #2066e4, #7c9ff5); border-radius: 4px 4px 0 0; min-height: 6px; }
+        .chart-bar { width: 22px; background: linear-gradient(to top, #2066e4, #7c9ff5); border-radius: 4px 4px 0 0; min-height: 6px; transition: height 0.4s ease; }
 
         .kpi-value-text { font-size: 26px; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
         .kpi-unit { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: 2px; }
 
-        .pie-chart-circle { width: 52px; height: 52px; border-radius: 50%; position: relative; }
+        .pie-chart-circle { width: 52px; height: 52px; border-radius: 50%; position: relative; transition: background 0.4s ease; }
         .pie-chart-circle::after { content: ''; position: absolute; width: 31px; height: 31px; background: var(--bg); border-radius: 50%; top: 10.5px; left: 10.5px; }
 
         .widget-controls { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); margin-top: 2px; }
         .type-select-mini { background: var(--bg); color: var(--muted); border: 1.5px solid var(--border); font-size: 10px; padding: 3px 5px; border-radius: 6px; cursor: pointer; font-family: inherit; }
 
-        /* ─── RIGHT SIDEBAR: SUGGESTIONS ────────────────── */
         .sidebar-right { width: 320px; background: var(--card); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; }
         .sidebar-header { padding: 14px 18px; font-weight: 700; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--warn); border-bottom: 1px solid var(--border); background: var(--card); position: sticky; top: 0; z-index: 10; }
         .rec-container { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
 
-        .amazon-rec-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; position: relative; transition: all .15s; }
-        .amazon-rec-card:hover { border-color: var(--warn); box-shadow: 0 2px 10px rgba(240,136,42,0.12); }
+        .amazon-rec-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; position: relative; }
         .rec-badge { position: absolute; top: 14px; right: 14px; background: var(--warn); color: #fff; font-size: 9px; font-weight: 700; padding: 3px 6px; border-radius: 8px; }
         .btn-add-rec { background: transparent; color: var(--warn); border: 1.5px solid var(--warn); width: 100%; padding: 8px; border-radius: 7px; font-weight: 600; font-size: 12px; cursor: pointer; margin-top: 5px; font-family: inherit; transition: 0.15s; }
         .btn-add-rec:hover { background: var(--warn); color: #fff; }
 
         .locked-placeholder { text-align: center; color: var(--muted); font-size: 13px; font-style: italic; padding: 24px; line-height: 1.6; }
         .widget-rename-input { font-size:12.5px; font-weight:600; color:var(--text); background:#fff; border:1.5px solid var(--primary); border-radius:6px; padding:3px 7px; width:100%; outline:none; box-shadow: 0 0 0 3px var(--primary-light); font-family: inherit; }
-        .widget-rename-input:focus { border-color: var(--primary); }
 
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #ccd6e6; border-radius: 3px; }
-        .sidebar-left ::-webkit-scrollbar-thumb { background: #3a4a70; }
-
-        /* ─── ZOHO OVERLAY PULSE ANIMATIONS ─── */
         @keyframes pulse {
             0% { transform: scale(1); opacity: 0.7; }
             50% { transform: scale(1.08); opacity: 1; }
             100% { transform: scale(1); opacity: 0.7; }
         }
-
-        #loading-overlay.active {
-            display: flex !important;
-        }
+        #loading-overlay.active { display: flex !important; }
     </style>
 </head>
 <body>
 
     <div id="loading-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #1c2340; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; display: none; transition: opacity 0.2s ease;">
-        <img src="zoho_symbol.png" alt="Zoho Loading" style="width: 130px; height: auto; margin-bottom: 20px; animation: pulse 1.5s infinite ease-in-out;">
-        <div style="color: #7aadff; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Syncing Workspace Metrics...</div>
+        <div style="color: #7aadff; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; animation: pulse 1.5s infinite ease-in-out;">Syncing Workspace Metrics...</div>
     </div>
 
     <div class="auth-overlay-backdrop" id="auth-layer-panel">
         <div class="auth-card-frame" style="text-align: center; padding: 40px 30px;">
             <h3 style="color: var(--primary); text-align: center; font-weight: 700;">🔒 Enterprise Login Portal</h3>
             <p style="font-size: 12px; color: var(--muted); text-align: center; margin-top: -8px;">Site24x7 Shared Pipeline Workspace</p>
-
-            <p style="font-size: 13px; color: var(--muted); line-height: 1.6; margin: 15px 0 5px 0;">
-                Workspace environments are securely configured via identity profiles. Please authorize access to proceed.
-            </p>
-
-            <button class="btn-login-submit" style="width: 100%; padding: 14px;" onclick="executeSessionAuthentication()">
-                Authenticate Workspace Profile
-            </button>
+            <p style="font-size: 13px; color: var(--muted); line-height: 1.6; margin: 15px 0 5px 0;">Workspace environments are securely configured via identity profiles. Please authorize access to proceed.</p>
+            <button class="btn-login-submit" style="width: 100%; padding: 14px;" onclick="executeSessionAuthentication()">Authenticate Workspace Profile</button>
         </div>
     </div>
 
     <nav>
         <div style="display: flex; align-items: center; gap: 14px;">
-            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 145 33'><text x='0' y='24' font-family='sans-serif' font-weight='700' font-size='22' fill='%2373CB23'>Site</text><text x='43' y='24' font-family='sans-serif' font-weight='900' font-size='22' fill='%23FFFFFF'>24x7</text></svg>" alt="Site24x7 Logo" style="height: 24px; width: auto; display: block;">
             <div class="logo" id="logo-branding-bar">⚡ Multi-Stage Recommendation Engine</div>
         </div>
         <div class="nav-actions">
@@ -197,8 +152,6 @@
     </nav>
 
     <div class="main-frame">
-
-        <!-- LEFT: Search & Workflow Actions -->
         <aside class="sidebar-left">
             <div class="sidebar-hd">
                 <div class="sidebar-hd-title">Dashboard Templates</div>
@@ -220,7 +173,6 @@
             </div>
         </aside>
 
-        <!-- CENTER: Dashboard Canvas / Matrix -->
         <div class="workspace-center">
             <div class="bundle-banner" id="bundle-banner">
                 <div class="bundle-title" id="bundle-banner-title">Step 2: Recommended Default Starter Options</div>
@@ -238,13 +190,11 @@
             </div>
         </div>
 
-        <!-- RIGHT: Suggestions -->
         <aside class="sidebar-right">
             <div class="sidebar-header" style="color: var(--primary);">👥 Peer Dashboard Suggestions</div>
             <div class="rec-container" id="peer-dashboard-suggestions-panel" style="border-bottom: 8px solid var(--bg);">
                 <div class="locked-placeholder">Log in to view metrics tracking insights...</div>
             </div>
-
             <div class="sidebar-header">💡 Step 3: Adaptive Cross-Pairings</div>
             <div class="rec-container" id="recommendations-panel">
                 <div class="locked-placeholder">Awaiting Step 1 completion...</div>
@@ -262,30 +212,13 @@
         let activeDashboardName     = "";
         let authenticatedUserToken  = "";
 
-        function escAttr(val) {
-            return String(val).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        }
+        function escAttr(val) { return String(val).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+        function escHTML(val) { return String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+        function slugifyCustomDashboardName(name) { return "custom_" + name.toLowerCase().replace(/[^a-z0-9]/g, "_"); }
 
-        function escHTML(val) {
-            return String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        }
+        function showLoadingSpinner() { document.getElementById('loading-overlay').classList.add('active'); }
+        function hideLoadingSpinner() { setTimeout(() => { document.getElementById('loading-overlay').classList.remove('active'); }, 400); }
 
-        function slugifyCustomDashboardName(name) {
-            return "custom_" + name.toLowerCase().replace(/[^a-z0-9]/g, "_");
-        }
-
-        // ─── LOADING ANIMATION CONTROLLERS ───────────────────────────────────
-        function showLoadingSpinner() {
-            document.getElementById('loading-overlay').classList.add('active');
-        }
-
-        function hideLoadingSpinner() {
-            setTimeout(() => {
-                document.getElementById('loading-overlay').classList.remove('active');
-            }, 400);
-        }
-
-        // ─── AUTH CONTROLLERS ────────────────────────────────────────────────
         async function checkActiveSessionState() {
             const cache = localStorage.getItem("site24x7_session_user");
             if (cache) {
@@ -295,39 +228,32 @@
                 document.getElementById("logo-branding-bar").innerText = `⚡ Profile Account: ${authenticatedUserToken.toUpperCase()}`;
                 await initStudio();
                 await fetchPeerDashboardSuggestions();
+                
+                // ─── RUN POLLING THREAD loop every 3s ───
+                setInterval(() => {
+                    if (currentDashboardWidgets.length > 0) {
+                        populateRealWidgetGraphs();
+                    }
+                }, 3000);
             } else {
                 document.getElementById("auth-layer-panel").style.display = "flex";
                 document.getElementById("logout-btn").style.display = "none";
             }
         }
 
-        async function executeSessionAuthentication() {
-            // Reroute the browser directly to your new backend FastAPI endpoint
-            window.location.href = "http://127.0.0.1:8000/api/v1/auth/login";
-        }
+        async function executeSessionAuthentication() { window.location.href = "http://127.0.0.1:8000/api/v1/auth/login"; }
+        function terminateActiveSessionToken() { localStorage.removeItem("site24x7_session_user"); location.reload(); }
 
-        function terminateActiveSessionToken() {
-            localStorage.removeItem("site24x7_session_user");
-            location.reload();
-        }
-
-        // ─── PEER SUGGESTIONS LAYER ──────────────────────────────────────────
         async function fetchPeerDashboardSuggestions() {
             const panel = document.getElementById('peer-dashboard-suggestions-panel');
-            if (!authenticatedUserToken) {
-                panel.innerHTML = '<div class="locked-placeholder">Log in to view metrics tracking insights...</div>';
-                return;
-            }
-
+            if (!authenticatedUserToken) return;
             try {
                 const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboards/peer-suggestions?username=${encodeURIComponent(authenticatedUserToken)}`);
                 const suggestions = await res.json();
-
                 if (!suggestions || suggestions.length === 0) {
-                    panel.innerHTML = '<div class="locked-placeholder" style="color: #64748b;">No recent custom creations saved by your up-stream tracking peers yet.</div>';
+                    panel.innerHTML = '<div class="locked-placeholder" style="color: #64748b;">No recent custom creations saved.</div>';
                     return;
                 }
-
                 let html = '';
                 suggestions.forEach(dash => {
                     html += `
@@ -336,37 +262,22 @@
                             <div>
                                 <span style="font-size:9px; color:#f59e0b; font-weight:700; text-transform:uppercase;">Peer Configuration</span>
                                 <h5 style="font-size:12px; margin-top:3px; color:#1a2033; font-weight:700; line-height:1.4;">${escHTML(dash.name)}</h5>
-                                <p style="font-size:11px; color:#64748b; margin-top:5px; font-style:italic;">Category Matrix: ${escHTML(dash.category)}</p>
                             </div>
                             <button class="btn-add-rec" style="background: #38bdf8; color: #0f172a;" onclick="selectDashboardFromSearch('${escAttr(dash.id)}', '${escAttr(dash.category)}')">Load Recommended Layout</button>
                         </div>`;
                 });
                 panel.innerHTML = html;
-
-            } catch (err) {
-                console.error("Peer suggestions synchronization fault:", err);
-                panel.innerHTML = '<div class="locked-placeholder">Failed to pull peer records.</div>';
-            }
+            } catch (err) { panel.innerHTML = '<div class="locked-placeholder">Failed to pull peer records.</div>'; }
         }
 
-        // ─── PIPELINE ENGINE HOOKS ───────────────────────────────────────────
         async function initStudio() {
-    // 1. Grab the active token directly from browser storage matrix
-    const token = localStorage.getItem("zoho_access_token");
-    
-    // 2. Pass the token directly inside the standard Authorization header request
-    const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboards`, {
-        method: "GET",
-        headers: {
-            "Authorization": "Bearer " + token,
-            "Content-Type": "application/json"
+            const token = localStorage.getItem("zoho_access_token");
+            const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboards`, {
+                method: "GET", headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" }
+            });
+            loadedDashboardProfilesMaster = await res.json();
+            handleSearchFiltering("");
         }
-    });
-    
-    loadedDashboardProfilesMaster = await res.json();
-    handleSearchFiltering("");
-    document.getElementById('recommendations-panel').innerHTML = '<div class="locked-placeholder">Awaiting Step 1 completion...</div>';
-}
 
         function handleSearchFiltering(searchQuery) {
             const panel      = document.getElementById('search-dropdown-panel');
@@ -401,20 +312,18 @@
             const panel = document.getElementById('search-dropdown-panel');
             const res   = await fetch('http://127.0.0.1:8000/api/v1/dashboards/recently-deleted');
             const items = await res.json();
-
             if (items.length === 0) {
                 panel.innerHTML = `
                     <div style="padding:15px; font-size:11px; color:#64748b; text-align:center; font-style:italic;">No historical hidden logs discovered.</div>
                     <div class="search-trash-trigger-option" onclick="handleSearchFiltering('')">⬅ Back to Active Catalog</div>`;
                 return;
             }
-
             let html = '<div style="padding: 8px 14px; font-size:10px; font-weight:bold; color:#f59e0b; background:#1e1b4b;">RESTOREABLE LAYOUTS:</div>';
             items.forEach(d => {
                 html += `
                     <div class="search-item-row" style="border-left: 2px solid #f59e0b;" onclick="restoreDashboardProfile('${escAttr(d.id)}', '${escAttr(d.name)}', '${escAttr(d.category)}')">
                         <span>🔄 ${escHTML(d.name)}</span>
-                        <button class="search-delete-x-btn" style="color:#f43f5e;" onclick="purgeDashboardPermanently(event, '${escAttr(d.id)}')" title="Purge Record Config File Completely">✕ Purge</button>
+                        <button class="search-delete-x-btn" style="color:#f43f5e;" onclick="purgeDashboardPermanently(event, '${escAttr(d.id)}')" title="Purge Completely">✕ Purge</button>
                     </div>`;
             });
             html += `<div class="search-trash-trigger-option" onclick="handleSearchFiltering('')">⬅ Back to Active Catalog</div>`;
@@ -423,52 +332,34 @@
 
         async function purgeDashboardPermanently(event, templateId) {
             event.stopPropagation();
-            if (!confirm("Are you absolutely sure you want to completely purge this configuration tracking matrix? This action cannot be reversed.")) return;
-            
+            if (!confirm("Are you sure you want to permanently clear this configuration layout configuration tracking matrix?")) return;
             try {
                 const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboards/purge/${templateId}?username=${encodeURIComponent(authenticatedUserToken)}`, { method: 'DELETE' });
-                const data = await res.json();
-                if (res.status === 403) {
-                    alert("You don't have permission to purge this dashboard.");
-                    return;
-                }
-                if (data && data.status === "success") {
-                    alert("Configuration parameters permanently cleared.");
-                    toggleRecentlyDeletedView(event);
-                }
-            } catch (err) {
-                console.error("Purge operations failure trace caught safely:", err);
-            }
+                if (res.status === 200) { toggleRecentlyDeletedView(event); }
+            } catch (err) { console.error(err); }
         }
 
         async function restoreDashboardProfile(templateId, name, category) {
             try {
                 const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboards/restore/${templateId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, category, username: authenticatedUserToken })
                 });
-                const data = await res.json();
-                if (data.status === "success") {
-                    alert(`Restored layout tracking vectors for: "${name}"`);
+                if ((await res.json()).status === "success") {
                     await initStudio();
                     selectDashboardFromSearch(templateId, category);
                 }
-            } catch (err) {
-                alert("Failed to communicate with restore pipeline: " + err);
-            }
+            } catch (err) { alert(err); }
         }
 
         async function selectDashboardFromSearch(templateId, category) {
             showLoadingSpinner(); 
-            
             const profile   = loadedDashboardProfilesMaster.find(d => d.id === templateId);
             const chosenName = profile ? profile.name : "Custom View";
 
-            document.getElementById('dashboard-search-bar').value      = chosenName;
+            document.getElementById('dashboard-search-bar').value = chosenName;
             document.getElementById('search-dropdown-panel').style.display = 'none';
-            activeCategoryTag = category;
-            
+            activeCategoryTag   = category;
             activeDashboardId   = templateId;
             activeDashboardName = chosenName;
 
@@ -476,20 +367,18 @@
             document.getElementById('custom-dash-type-text').style.display  = 'none';
             document.getElementById('save-dash-btn').style.display          = 'block';
 
-            const titleBar = document.getElementById('workspace-active-title-bar');
             document.getElementById('active-dashboard-display-name').innerText = `📊 ${chosenName}`;
-            titleBar.style.display = 'flex';
-
-            document.getElementById('recommendations-panel').innerHTML = '<div class="locked-placeholder">Loading workspace tracking state...</div>';
+            document.getElementById('workspace-active-title-bar').style.display = 'flex';
 
             try {
-                const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboard-defaults?category=${category}&template_id=${encodeURIComponent(templateId)}&dashboard_name=${encodeURIComponent(chosenName)}&username=${encodeURIComponent(authenticatedUserToken)}`);
+                const token = localStorage.getItem("zoho_access_token");
+                const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboard-defaults?category=${category}&template_id=${encodeURIComponent(templateId)}&username=${encodeURIComponent(authenticatedUserToken)}`, {
+                    method: "GET", headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" }
+                });
                 fetchedDefaultsBuffer = await res.json();
 
                 if (fetchedDefaultsBuffer && fetchedDefaultsBuffer.length > 0) {
-                    currentDashboardWidgets = fetchedDefaultsBuffer.map(item => ({
-                        id: item.widget_id, name: item.name, renderType: 'bar'
-                    }));
+                    currentDashboardWidgets = fetchedDefaultsBuffer.map(item => ({ id: item.widget_id, name: item.name, renderType: 'bar' }));
                     document.getElementById('bundle-banner').style.display = 'none';
                     renderCanvas();
                     fetchRecommendations();
@@ -498,47 +387,25 @@
                     renderStep2BundleBanner();
                 }
             } catch (err) {
-                console.error("Error loading saved layout tracks:", err);
                 triggerStep2Fetch(activeCategoryTag, chosenName, templateId);
-            } finally {
-                hideLoadingSpinner(); 
-            }
+            } finally { hideLoadingSpinner(); }
         }
 
         async function removeDashboardFromDatabase(event, templateId) {
             event.stopPropagation();
-            const profile    = loadedDashboardProfilesMaster.find(d => d.id === templateId);
-            const chosenName = profile ? profile.name : "Selected Profile";
-
-            if (!confirm(`Are you absolutely sure you want to permanently delete "${chosenName}"?`)) return;
-
+            if (!confirm("Are you sure you want to delete this active configuration profile dashboard?")) return;
             try {
-                const res    = await fetch(`http://127.0.0.1:8000/api/v1/dashboards/delete/${templateId}?username=${encodeURIComponent(authenticatedUserToken)}`, { method: 'DELETE' });
-                const result = await res.json();
-
-                if (res.status === 403) {
-                    alert("You don't have permission to delete this dashboard.");
-                    return;
-                }
-                if (result && result.status === "success") {
-                    alert(`Successfully deleted "${chosenName}" from active registry directories.`);
+                const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboards/delete/${templateId}?username=${encodeURIComponent(authenticatedUserToken)}`, { method: 'DELETE' });
+                if (res.status === 200) {
                     document.getElementById('dashboard-search-bar').value = '';
                     currentDashboardWidgets = [];
-                    activeCategoryTag = "";
-                    activeDashboardId = "";
-                    activeDashboardName = "";
                     renderCanvas();
                     document.getElementById('bundle-banner').style.display = 'none';
                     document.getElementById('workspace-active-title-bar').style.display = 'none';
                     document.getElementById('save-dash-btn').style.display = 'none';
-                    document.getElementById('recommendations-panel').innerHTML = '<div class="locked-placeholder">Awaiting Step 1 completion...</div>';
                     await initStudio();
-                } else {
-                    alert("Error updating target layout configurations: " + (result.message || "Unknown error"));
                 }
-            } catch (err) {
-                alert("Server infrastructure tracking pipeline error: " + err);
-            }
+            } catch (err) { alert(err); }
         }
 
         function activateCustomFlowUI() {
@@ -550,29 +417,23 @@
             document.getElementById('custom-dash-type-text').style.display = 'block';
             document.getElementById('custom-dash-type-text').value         = '';
             document.getElementById('save-dash-btn').style.display         = 'block';
-            
             activeDashboardId   = "";
             activeDashboardName = "";
 
             document.getElementById('custom-dash-type-text').oninput = function() {
                 clearTimeout(customDebounceTimer);
                 customDebounceTimer = setTimeout(() => {
-                    const textVal  = this.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
+                    activeCategoryTag = this.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '_') || "general";
                     const dashName = document.getElementById('custom-dash-name').value.trim() || "Custom Dashboard";
-                    activeCategoryTag = textVal || "general";
-
-                    const titleBar = document.getElementById('workspace-active-title-bar');
                     document.getElementById('active-dashboard-display-name').innerText = `🛠️ ${dashName} (${activeCategoryTag})`;
-                    titleBar.style.display = 'flex';
-
+                    document.getElementById('workspace-active-title-bar').style.display = 'flex';
                     triggerStep2Fetch(activeCategoryTag, dashName, slugifyCustomDashboardName(dashName));
                 }, 400);
             };
         }
 
         async function triggerStep2Fetch(category, dashboardDisplayName, templateId) {
-            document.getElementById('recommendations-panel').innerHTML = '<div class="locked-placeholder">Awaiting Step 2 confirmation...</div>';
-            const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboard-defaults?category=${category}&template_id=${encodeURIComponent(templateId)}&dashboard_name=${encodeURIComponent(dashboardDisplayName)}&username=${encodeURIComponent(authenticatedUserToken)}`);
+            const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboard-defaults?category=${category}&template_id=${encodeURIComponent(templateId)}&username=${encodeURIComponent(authenticatedUserToken)}`);
             fetchedDefaultsBuffer = await res.json();
             document.getElementById('bundle-banner-title').innerText = `Step 2: Mapped Core Suggestions for "${dashboardDisplayName}"`;
             renderStep2BundleBanner();
@@ -581,13 +442,11 @@
         function renderStep2BundleBanner() {
             const banner = document.getElementById('bundle-banner');
             const container = document.getElementById('bundle-options-container');
-
             if (!fetchedDefaultsBuffer || fetchedDefaultsBuffer.length === 0) {
                 container.innerHTML = '<span style="font-size:12px; color:#94a3b8;">Type a context name to load starter tracks...</span>';
                 banner.style.display = 'flex';
                 return;
             }
-
             let html = '';
             fetchedDefaultsBuffer.forEach((item, index) => {
                 html += `
@@ -605,9 +464,7 @@
             currentDashboardWidgets = [];
             fetchedDefaultsBuffer.forEach((item, index) => {
                 const chk = document.getElementById(`chk-def-${index}`);
-                if (chk && chk.checked) {
-                    currentDashboardWidgets.push({ id: item.widget_id, name: item.name, renderType: 'bar' });
-                }
+                if (chk && chk.checked) { currentDashboardWidgets.push({ id: item.widget_id, name: item.name, renderType: 'bar' }); }
             });
             document.getElementById('bundle-banner').style.display = 'none';
             renderCanvas();
@@ -616,11 +473,9 @@
 
         function promptAndInjectCustomWidget() {
             const customName = prompt("Enter a unique title for your custom metric widget:");
-            if (customName === null) return;
-            const trimmed = customName.trim();
-            if (!trimmed) { alert("Metric widget names cannot be blank!"); return; }
+            if (!customName || !customName.trim()) return;
             if (!activeCategoryTag) activeCategoryTag = "general";
-            currentDashboardWidgets.push({ id: "manual_widget_" + Date.now(), name: trimmed, renderType: 'bar' });
+            currentDashboardWidgets.push({ id: "manual_widget_" + Date.now(), name: customName.trim(), renderType: 'bar' });
             renderCanvas();
             fetchRecommendations();
         }
@@ -646,163 +501,143 @@
         }
 
         function triggerInlineWidgetRename(index) {
-            const cards = document.getElementById('canvas-grid').querySelectorAll('.widget-card');
-            const card  = cards[index];
-            if (!card) return;
-
+            const card = document.getElementById('canvas-grid').querySelectorAll('.widget-card')[index];
             const heading = card.querySelector('.editable-widget-heading');
-            if (!heading) return;
-
             const currentName = currentDashboardWidgets[index].name;
 
             const input = document.createElement('input');
-            input.type      = 'text';
-            input.value     = currentName;
-            input.className = 'widget-rename-input';
-            heading.replaceWith(input);
-            input.focus();
-            input.select();
+            input.type = 'text'; input.value = currentName; input.className = 'widget-rename-input';
+            heading.replaceWith(input); input.focus(); input.select();
 
             let committed = false;
-
             function commitRename(save) {
-                if (committed) return;
-                committed = true;
-
+                if (committed) return; committed = true;
                 const clean = save ? input.value.trim() : '';
                 const newHeading = document.createElement('h4');
                 newHeading.className  = 'editable-widget-heading';
-                newHeading.title      = 'Double click to rename metric widget';
                 newHeading.ondblclick = () => triggerInlineWidgetRename(index);
 
-                if (!clean) {
-                    newHeading.textContent = currentName;
-                    input.replaceWith(newHeading);
-                    return;
-                }
-
+                if (!clean) { newHeading.textContent = currentName; input.replaceWith(newHeading); return; }
                 currentDashboardWidgets[index].name = clean;
-                newHeading.textContent = clean;
-                input.replaceWith(newHeading);
+                newHeading.textContent = clean; input.replaceWith(newHeading);
 
                 fetch('http://127.0.0.1:8000/api/v1/widgets/update', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ widget_id: currentDashboardWidgets[index].id, widget_name: clean })
-                })
-                .then(r => r.json())
-                .then(result => {
-                    if (result && result.status === "success") {
-                        fetchRecommendations();
-                    } else {
-                        console.error("DB widget name sync failed:", result && result.message);
-                    }
-                })
-                .catch(e => console.error("Widget update request failed:", e));
+                }).then(() => fetchRecommendations());
             }
 
-            input.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter')  { 
-                    e.preventDefault(); 
-                    e.stopPropagation(); 
-                    commitRename(true); 
-                }
-                if (e.key === 'Escape') { 
-                    e.preventDefault(); 
-                    commitRename(false); 
-                }
-            });
-
-            input.addEventListener('blur', function() { 
-                commitRename(true); 
-            });
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') commitRename(true); if (e.key === 'Escape') commitRename(false); });
+            input.addEventListener('blur', () => commitRename(true));
         }
 
         function generateDeterministicValue(nameString, offset) {
             let hash = 0;
-            for (let i = 0; i < nameString.length; i++) {
-                hash = nameString.charCodeAt(i) + ((hash << 5) - hash);
-            }
+            for (let i = 0; i < nameString.length; i++) { hash = nameString.charCodeAt(i) + ((hash << 5) - hash); }
             return Math.abs((hash + offset * 73) % 85) + 12;
+        }
+
+        // ─── HIGH LEVEL REAL-TIME TELEMETRY ENGINE LOOP HOOKS ───
+        async function populateRealWidgetGraphs() {
+            const token = localStorage.getItem("zoho_access_token");
+            const cards = document.querySelectorAll('.widget-card');
+
+            cards.forEach(async (card) => {
+                const widgetId = card.id.replace('card-', '');
+                const renderType = card.getAttribute('data-render-type');
+
+                try {
+                    const res = await fetch(`http://127.0.0.1:8000/api/v1/widget-graph-data?monitor_id=${encodeURIComponent(activeDashboardId)}&metric_key=${encodeURIComponent(widgetId)}`, {
+                        headers: { "Authorization": "Bearer " + token }
+                    });
+                    const data = await res.json();
+                    if (data && data.points) {
+                        const points = data.points;
+                        const latest = points[points.length - 1];
+
+                        if (renderType === 'bar') {
+                            const bars = card.querySelectorAll('.chart-bar');
+                            bars.forEach((bar, idx) => { if(points[idx]) bar.style.height = `${points[idx]}%`; });
+                            const displaySpan = card.querySelector('.real-metric-numeric-label');
+                            if (displaySpan) displaySpan.innerText = latest;
+                        } else if (renderType === 'kpi') {
+                            const kpiVal = card.querySelector('.kpi-value-text-display');
+                            if (kpiVal) kpiVal.innerText = latest;
+                        } else if (renderType === 'pie') {
+                            const circle = card.querySelector('.pie-chart-circle');
+                            if (circle) circle.style.background = `conic-gradient(#2066e4 0% ${latest}%, #dde3eb ${latest}% 100%)`;
+                            const pieText = card.querySelector('.pie-text-display');
+                            if (pieText) pieText.innerText = `${latest}%`;
+                        }
+                    }
+                } catch (e) { console.error("Telemetry channel error:", e); }
+            });
         }
 
         function renderCanvas() {
             const grid = document.getElementById('canvas-grid');
             grid.innerHTML = '';
-
             if (currentDashboardWidgets.length === 0) {
-                grid.innerHTML = '<div class="empty-hint"><h3>Dashboard Canvas workspace clear. Use the recommendations panel to inject components.</h3></div>';
+                grid.innerHTML = '<div class="empty-hint"><h3>Dashboard Canvas clear. Add elements to begin.</h3></div>';
                 return;
             }
 
             currentDashboardWidgets.forEach((w, index) => {
                 const coreVal = generateDeterministicValue(w.name, 0);
                 let innerChartHTML = '';
-                
                 let unit = '%';
+                
                 if (w.name && typeof w.name === 'string') {
                     const lowerName = w.name.toLowerCase();
-                    if (lowerName.includes('rate') || lowerName.includes('volume') || lowerName.includes('count')) {
-                        unit = 'req/s';
-                    } else if (lowerName.includes('ms') || lowerName.includes('latency') || lowerName.includes('time')) {
-                        unit = 'ms';
-                    }
+                    if (lowerName.includes('rate') || lowerName.includes('volume')) unit = 'req/s';
+                    else if (lowerName.includes('ms') || lowerName.includes('latency')) unit = 'ms';
                 }
 
                 if (w.renderType === 'pie') {
                     innerChartHTML = `
                         <div style="font-size: 13px; font-weight: bold; color: #6b7999; text-transform: uppercase;">Allocation:</div>
                         <div class="pie-chart-circle" style="background: conic-gradient(#2066e4 0% ${coreVal}%, #dde3eb ${coreVal}% 100%);"></div>
-                        <div style="font-size:13px; font-weight:800; color:#2066e4;">${coreVal}%</div>`;
+                        <div style="font-size:13px; font-weight:800; color:#2066e4;" class="pie-text-display">${coreVal}%</div>`;
                 } else if (w.renderType === 'kpi') {
                     innerChartHTML = `
                         <div style="display:flex; flex-direction:column; justify-content: center; height:100%;">
-                            <span style="font-size:11px; color:#475569; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">Current Value</span>
-                            <div class="kpi-value-text">${coreVal}<span class="kpi-unit">${unit}</span></div>
+                            <span style="font-size:11px; color:#475569; font-weight:bold; text-transform:uppercase;">Current Value</span>
+                            <div class="kpi-value-text"><span class="kpi-value-text-display">${coreVal}</span><span class="kpi-unit">${unit}</span></div>
                         </div>
                         <div style="font-size: 11px; padding: 4px 8px; background: #10b9811c; color: #10b981; border-radius:4px; font-weight:bold;">● Live Stream</div>`;
                 } else {
-                    const bar1 = generateDeterministicValue(w.name, 1);
-                    const bar2 = generateDeterministicValue(w.name, 2);
-                    const bar3 = generateDeterministicValue(w.name, 3);
-                    const bar4 = coreVal; 
                     innerChartHTML = `
                         <div class="simplified-bar-container">
-                            <div class="chart-bar" style="height: ${bar1}%; opacity: 0.4;"></div>
-                            <div class="chart-bar" style="height: ${bar2}%; opacity: 0.6;"></div>
-                            <div class="chart-bar" style="height: ${bar3}%; opacity: 0.8;"></div>
-                            <div class="chart-bar" style="height: ${bar4}%;"></div>
+                            <div class="chart-bar" style="height: ${generateDeterministicValue(w.name, 1)}%; opacity: 0.4;"></div>
+                            <div class="chart-bar" style="height: ${generateDeterministicValue(w.name, 2)}%; opacity: 0.6;"></div>
+                            <div class="chart-bar" style="height: ${generateDeterministicValue(w.name, 3)}%; opacity: 0.8;"></div>
+                            <div class="chart-bar" style="height: ${coreVal}%;"></div>
                         </div>
                         <div style="display:flex; flex-direction:column; justify-content:center; align-items:flex-end; min-width:65px;">
                             <span style="font-size:10px; color:#475569; font-weight:bold; text-transform:uppercase;">Latest</span>
-                            <span style="font-size:18px; font-weight:800; color:#2066e4;">${bar4}<span style="font-size:10px; color:#475569;">${unit}</span></span>
+                            <span style="font-size:18px; font-weight:800; color:#2066e4;"><span class="real-metric-numeric-label">${coreVal}</span><span style="font-size:10px; color:#475569;">${unit}</span></span>
                         </div>`;
                 }
 
                 const card = document.createElement('div');
-                card.className = 'widget-card';
+                card.className = 'widget-card'; card.id = `card-${w.id}`;
+                card.setAttribute('data-render-type', w.renderType);
 
                 const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'close-btn';
-                deleteBtn.innerText = '✕';
+                deleteBtn.className = 'close-btn'; deleteBtn.innerText = '✕';
                 deleteBtn.addEventListener('click', () => removeWidget(index));
                 card.appendChild(deleteBtn);
 
                 const headerWrapper = document.createElement('div');
-                headerWrapper.innerHTML = `<span style="font-size:9px; color:#2066e4; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Active Telemetry Feed</span>`;
-                
+                headerWrapper.innerHTML = `<span style="font-size:9px; color:#2066e4; font-weight:700; text-transform:uppercase;">Active Telemetry Feed</span>`;
                 const titleHeading = document.createElement('h4');
-                titleHeading.className = 'editable-widget-heading';
-                titleHeading.title = 'Double click to rename metric widget';
-                titleHeading.innerText = w.name || "Unnamed Metric"; 
+                titleHeading.className = 'editable-widget-heading'; titleHeading.innerText = w.name;
                 titleHeading.addEventListener('dblclick', () => triggerInlineWidgetRename(index));
                 
-                headerWrapper.appendChild(titleHeading);
-                card.appendChild(headerWrapper);
+                headerWrapper.appendChild(titleHeading); card.appendChild(headerWrapper);
 
                 const chartBox = document.createElement('div');
-                chartBox.className = 'chart-mock-box';
-                chartBox.innerHTML = innerChartHTML;
+                chartBox.className = 'chart-mock-box'; chartBox.innerHTML = innerChartHTML;
                 card.appendChild(chartBox);
 
                 const controlsWrapper = document.createElement('div');
@@ -812,123 +647,61 @@
                 const typeSelect = document.createElement('select');
                 typeSelect.className = 'type-select-mini';
                 typeSelect.innerHTML = `
-                    <option value="bar" ${w.renderType === 'bar' ? 'selected' : ''}>View: 4-Bar Graph</option>
+                    <option value="bar" ${w.renderType === 'bar' ? 'selected' : ''}>View: Bar Graph</option>
                     <option value="pie" ${w.renderType === 'pie' ? 'selected' : ''}>View: Pie Chart</option>
                     <option value="kpi" ${w.renderType === 'kpi' ? 'selected' : ''}>View: KPI Summary</option>`;
-                typeSelect.addEventListener('change', (e) => toggleWidgetVisualType(index, e.target.value));
+                typeSelect.onchange = (e) => toggleWidgetVisualType(index, e.target.value);
                 
-                controlsWrapper.appendChild(typeSelect);
-                card.appendChild(controlsWrapper);
-
+                controlsWrapper.appendChild(typeSelect); card.appendChild(controlsWrapper);
                 grid.appendChild(card);
             });
+
+            // Initial populating tick
+            populateRealWidgetGraphs();
         }
 
         async function fetchRecommendations() {
-            const panel = document.getElementById('recommendations-panel');
-            if (!activeCategoryTag) {
-                panel.innerHTML = '<div class="locked-placeholder">Awaiting Step 1 completion...</div>';
-                return;
-            }
-
+            if (!activeCategoryTag) return;
             try {
-                const queryParams = currentDashboardWidgets.map(w => `widget_id=${encodeURIComponent(w.id)}`).join('&');
-                const res = await fetch(`http://127.0.0.1:8000/api/v1/recommendations?${queryParams}&category=${activeCategoryTag}`);
-
-                if (!res.ok) {
-                    panel.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px; margin-top:20px; font-style:italic;">Adaptive side metrics syncing...</div>';
-                    return;
-                }
-
+                const res = await fetch(`http://127.0.0.1:8000/api/v1/recommendations?category=${activeCategoryTag}`);
                 const data = await res.json();
-                if (!data.recommendations || data.recommendations.length === 0) {
-                    panel.innerHTML = '<div style="text-align:center; color:#64748b; font-size:12px; margin-top:30px; font-style:italic;">No companion metrics discovered.</div>';
-                    return;
-                }
-
                 let html = '';
                 data.recommendations.forEach(rec => {
                     html += `
                         <div class="amazon-rec-card">
                             <span class="rec-badge">${rec.confidence}% Match</span>
                             <div>
-                                <span style="font-size:9px; color:#2066e4; font-weight:700; text-transform:uppercase;">Suggested Companion</span>
-                                <h5 style="font-size:12px; margin-top:3px; padding-right:65px; color:#1a2033; font-weight:700; line-height:1.4;">${escHTML(rec.name)}</h5>
-                                <p style="font-size:11px; color:#64748b; margin-top:5px; font-style:italic;">${escHTML(rec.reason)}</p>
+                                <h5 style="font-size:12px; color:#1a2033; font-weight:700;">${escHTML(rec.name)}</h5>
+                                <p style="font-size:11px; color:#64748b; margin-top:2px;">${escHTML(rec.reason)}</p>
                             </div>
                             <button class="btn-add-rec" onclick="addWidget('${escAttr(rec.widget_id)}', '${escAttr(rec.name)}')">Add Metric Component</button>
                         </div>`;
                 });
-                panel.innerHTML = html;
-
-            } catch (error) {
-                console.error("Shielded recommendation panel trace caught safely:", error);
-                panel.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px; margin-top:20px; font-style:italic;">Adaptive metrics updating...</div>';
-            }
+                document.getElementById('recommendations-panel').innerHTML = html || '<div class="locked-placeholder">No options matching environment.</div>';
+            } catch (error) { console.error(error); }
         }
 
         async function commitDashboardToDatabase() {
-            let name = "";
-            let generatedId = "";
-            
-            if (activeDashboardId) {
-                name = activeDashboardName;
-                generatedId = activeDashboardId;
-            } else {
-                name = document.getElementById('custom-dash-name').value.trim();
-                if (!name) { alert("Please input a valid dashboard configuration name!"); return; }
-                generatedId = slugifyCustomDashboardName(name);
-            }
-            
-            if (currentDashboardWidgets.length === 0) { alert("Cannot commit an empty layout configuration!"); return; }
+            let name = activeDashboardId ? activeDashboardName : document.getElementById('custom-dash-name').value.trim();
+            let generatedId = activeDashboardId ? activeDashboardId : slugifyCustomDashboardName(name);
+            if (!name || currentDashboardWidgets.length === 0) return;
+
             const widgetsPayload = currentDashboardWidgets.map(w => ({ id: w.id, name: w.name }));
-
-            let res, data;
             try {
-                res = await fetch('http://127.0.0.1:8000/api/v1/dashboards/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        template_id: generatedId, 
-                        template_name: name, 
-                        category_tag: activeCategoryTag, 
-                        widgets: widgetsPayload,
-                        username: authenticatedUserToken
-                    })
+                const res = await fetch('http://127.0.0.1:8000/api/v1/dashboards/save', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ template_id: generatedId, template_name: name, category_tag: activeCategoryTag, widgets: widgetsPayload, username: authenticatedUserToken })
                 });
-            } catch (err) {
-                alert(`❌ Save failed: could not reach the server (${err}). Nothing was persisted.`);
-                console.error("Save request network failure:", err);
-                return;
-            }
-
-            if (!res.ok) {
-                let detail = "";
-                try { detail = JSON.stringify(await res.json()); } catch (_) { detail = res.statusText; }
-                alert(`❌ Save failed (HTTP ${res.status}): ${detail}\n\nYour changes were NOT saved.`);
-                console.error("Save request rejected:", res.status, detail);
-                return;
-            }
-
-            try { data = await res.json(); } catch (_) { data = null; }
-            if (!data || data.status !== "success") {
-                alert(`❌ Save failed: ${data && data.message ? data.message : "unknown error"}\n\nYour changes were NOT saved.`);
-                console.error("Save reported failure:", data);
-                return;
-            }
-
-            alert(`🚀 Success! Dashboard "${name}" configurations persistent under profile context.`);
-            await initStudio();
-            await fetchPeerDashboardSuggestions();
-
-            document.getElementById('dashboard-search-bar').value = name;
-            document.getElementById('active-dashboard-display-name').innerText = `📊 ${name}`;
-            document.getElementById('workspace-active-title-bar').style.display = 'flex';
-            document.getElementById('custom-dash-name').style.display      = 'none';
-            document.getElementById('custom-dash-type-text').style.display = 'none';
-            
-            activeDashboardId   = generatedId;
-            activeDashboardName = name;
+                if(res.ok) {
+                    alert(`Configurations persistent under profile context.`);
+                    await initStudio();
+                    document.getElementById('dashboard-search-bar').value = name;
+                    document.getElementById('active-dashboard-display-name').innerText = `📊 ${name}`;
+                    document.getElementById('custom-dash-name').style.display = 'none';
+                    document.getElementById('custom-dash-type-text').style.display = 'none';
+                    activeDashboardId = generatedId; activeDashboardName = name;
+                }
+            } catch (err) { alert(err); }
         }
 
         window.onload = checkActiveSessionState;
