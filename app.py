@@ -5,16 +5,22 @@ from pydantic import BaseModel
 from typing import List, Optional
 import sqlite3
 import os
+import json
+import re
 import urllib.parse
 import requests
 import random
 from dotenv import load_dotenv
+from google import genai
 
 load_dotenv()
 
 ZOHO_CLIENT_ID = os.getenv("ZOHO_CLIENT_ID")
 ZOHO_CLIENT_SECRET = os.getenv("ZOHO_CLIENT_SECRET")
 ZOHO_REDIRECT_URI = os.getenv("ZOHO_REDIRECT_URI")
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+gemini_client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
 ZOHO_AUTH_URL = "https://accounts.zoho.com/oauth/v2/auth"
 ZOHO_TOKEN_URL = "https://accounts.zoho.com/oauth/v2/token"
@@ -29,6 +35,10 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
+
+def slugify_widget_name(name: str) -> str:
+    slug = re.sub(r'[^a-z0-9]+', '_', name.strip().lower()).strip('_')
+    return slug or "widget"
 
 def fetch_live_site24x7_monitors(access_token: str) -> list:
     headers = {
@@ -51,6 +61,10 @@ def fetch_exact_monitor_widgets(access_token: str, monitor_id: str) -> list:
         "Authorization": f"Zoho-oauthtoken {access_token}",
         "Accept": "application/json; version=2.0"
     }
+    
+    # ─── LOG LAYER: INCOMING SITE HANDSHAKE REQUEST ───
+    print(f"\n📡 [SITE24X7 FETCH] Interrogating Monitor Profile ID: {monitor_id}")
+    
     try:
         performance_url = f"{SITE24X7_API_BASE}/monitors/performance/{monitor_id}"
         response = requests.get(performance_url, headers=headers)
@@ -58,6 +72,10 @@ def fetch_exact_monitor_widgets(access_token: str, monitor_id: str) -> list:
         
         if response.status_code == 200:
             chart_configs = response.json().get("data", {}).get("chart_configs", [])
+            
+            # Log raw length of chart configurations from performance track
+            print(f"📊 [STAGE: PERFORMANCE CHARTS] Found {len(chart_configs)} configuration indicators in live API.")
+            
             for chart in chart_configs:
                 metric_key = chart.get("value") or chart.get("metric_name")
                 metric_name = chart.get("name")
@@ -67,13 +85,19 @@ def fetch_exact_monitor_widgets(access_token: str, monitor_id: str) -> list:
                         "name": metric_name
                     })
             if formatted_widgets:
+                print(f"✅ [SUCCESS: PERFORMANCE SOURCE] Packaged {len(formatted_widgets)} active telemetry metrics.")
                 return formatted_widgets
+        else:
+            print(f"⚠️ [PERFORMANCE TRACK SKIPPED] REST Endpoint returned status code: {response.status_code}")
 
         # Fallback to metadata profile properties
         info_url = f"{SITE24X7_API_BASE}/monitors/{monitor_id}"
         info_response = requests.get(info_url, headers=headers)
+        
         if info_response.status_code == 200:
             monitor_profile = info_response.json().get("data", {})
+            print(f"🗃️ [STAGE: METADATA Fallback] Extracting keys from profile definition matrix...")
+            
             for key, value in monitor_profile.items():
                 if isinstance(value, (list, dict)) or value is None:
                     continue
@@ -81,11 +105,16 @@ def fetch_exact_monitor_widgets(access_token: str, monitor_id: str) -> list:
                     "widget_id": f"widget_{monitor_id}_{key}",
                     "name": f"{key.replace('_', ' ').title()}: {value}"
                 })
+                
+            print(f"✅ [SUCCESS: METADATA SOURCE] Packaged {len(formatted_widgets)} fields as baseline indicators.")
             return formatted_widgets
+        else:
+            print(f"❌ [METADATA TRACK FAILED] REST Endpoint returned status code: {info_response.status_code}")
+            
     except Exception as e:
-        print(f"❌ Diagnostic exception caught: {str(e)}")
+        print(f"❌ [CRITICAL EXCEPTION] Diagnostic pipeline check caught error: {str(e)}")
+        
     return []
-
 # ─── ADDED ENDPOINT FOR LIVE DATA STREAMS ───
 @app.get("/api/v1/widget-graph-data")
 def get_widget_graph_data(monitor_id: str, metric_key: str, authorization: Optional[str] = Header(None)):
@@ -180,6 +209,15 @@ class SaveDashboardPayload(BaseModel):
 class UpdateWidgetPayload(BaseModel):
     widget_id: str
     widget_name: str
+
+class AnalyzeDashboardPayload(BaseModel):
+    dashboard_name: str
+    category: str
+    widgets: List[DashboardWidgetItem]
+
+class SuggestWidgetsPayload(BaseModel):
+    dashboard_name: str
+    category: Optional[str] = "general"
 
 class LoginPayload(BaseModel):
     username: str
@@ -387,20 +425,26 @@ def get_dashboard_defaults(category: str, template_id: Optional[str] = None, das
     if not category or category == "undefined":
         return []
 
+    conn = sqlite3.connect('metrics_engine.db')
+    cursor = conn.cursor()
+    rows = []
+
+    if template_id:
+        cursor.execute("SELECT w.widget_id, w.widget_name FROM dashboard_defaults d JOIN widgets w ON d.widget_id = w.widget_id WHERE d.template_id = ? AND d.username = ?", (template_id, username))
+        rows = cursor.fetchall()
+
+    if rows:
+        conn.close()
+        return [{"widget_id": r[0], "name": r[1]} for r in rows]
+
+    # No saved layout yet for this user/dashboard — for live dashboards, seed from the live Site24x7 API
     if authorization and template_id and template_id.startswith("live_template_"):
         token = authorization.replace("Bearer ", "").strip()
         clean_monitor_id = template_id.replace("live_template_", "")
         live_widgets = fetch_exact_monitor_widgets(token, clean_monitor_id)
         if live_widgets:
+            conn.close()
             return live_widgets
-
-    conn = sqlite3.connect('metrics_engine.db')
-    cursor = conn.cursor()
-    rows = []
-    
-    if template_id:
-        cursor.execute("SELECT w.widget_id, w.widget_name FROM dashboard_defaults d JOIN widgets w ON d.widget_id = w.widget_id WHERE d.template_id = ? AND d.username = ?", (template_id, username))
-        rows = cursor.fetchall()
 
     if not rows:
         cursor.execute("SELECT widget_id, widget_name FROM widgets WHERE category_tag = ?", (category,))
@@ -454,27 +498,200 @@ def purge_dashboard_permanently(template_id: str, username: str = "admin"):
         conn.close()
 
 @app.get("/api/v1/recommendations")
-def get_recommendations(widget_id: List[str] = Query(None), category: Optional[str] = None):
-    if not category or category == "":
+def get_recommendations(
+    widget_id: List[str] = Query(None), 
+    widget_name: List[str] = Query(None), 
+    category: Optional[str] = None
+):
+    active_ids = widget_id or []
+    active_names = widget_name or []
+    compiled_recs = []
+
+    # 1. Break down the current dashboard's widgets into component terms
+    # This acts as our dynamic fingerprint for the selected dashboard
+    current_dashboard_terms = set()
+    active_base_keys = set()
+    
+    for idx, w_id in enumerate(active_ids):
+        # Extract the base property name (e.g., 'widget_123_auth_method' -> 'auth_method')
+        base_key = w_id.split('_')[-1].lower().replace(":", "").strip() if '_' in w_id else w_id.lower()
+        active_base_keys.add(base_key)
+        
+        # Split into individual descriptive terms to find contextual matches
+        for token in base_key.split('_'):
+            if len(token) > 2: # Ignore tiny connecting characters
+                current_dashboard_terms.add(token)
+
+    if not active_base_keys:
         return {"recommendations": []}
 
     conn = sqlite3.connect('metrics_engine.db')
     cursor = conn.cursor()
-    compiled_recs = []
-    seen_widget_ids = set(widget_id) if widget_id else set()
 
-    cursor.execute("SELECT widget_id, widget_name FROM widgets WHERE category_tag = ?", (category,))
-    for row in cursor.fetchall():
-        w_id, w_name = row
-        if w_id not in seen_widget_ids:
-            compiled_recs.append({
-                "widget_id": w_id, "name": w_name, "confidence": 94.0,
-                "reason": f"Recommended baseline component for monitoring active {category} environments"
+    # 2. Query the entire widgets registry to find anything sharing descriptive terms
+    # We use this to see what other elements relate to what is on our screen
+    cursor.execute("SELECT widget_id, widget_name FROM widgets")
+    registered_widgets = cursor.fetchall()
+    
+    scored_suggestions = []
+    
+    for reg_id, reg_name in registered_widgets:
+        reg_base_key = reg_id.split('_')[-1].lower().replace(":", "").strip() if '_' in reg_id else reg_id.lower()
+        
+        # Skip if this widget is already sitting on our current dashboard canvas
+        if reg_base_key in active_base_keys:
+            continue
+            
+        # Count how many descriptive terms this available widget shares with our active canvas
+        reg_tokens = set(reg_base_key.split('_'))
+        matching_terms_count = len(current_dashboard_terms.intersection(reg_tokens))
+        
+        if matching_terms_count > 0:
+            # Calculate a pure contextual relevance score
+            relevance_score = (matching_terms_count / len(current_dashboard_terms.union(reg_tokens))) * 100
+            
+            scored_suggestions.append({
+                "widget_id": reg_id,
+                "name": reg_name,
+                "score": round(relevance_score, 1)
             })
-            seen_widget_ids.add(w_id)
+
+    # 3. Format the top matching items for the frontend UI
+    # We sort by highest contextual term overlap score
+    scored_suggestions.sort(key=lambda x: x["score"], reverse=True)
+    
+    seen_base_keys = set()
+    for item in scored_suggestions:
+        b_key = item["widget_id"].split('_')[-1].lower()
+        if b_key not in seen_base_keys:
+            seen_base_keys.add(b_key)
+            
+            # Bound confidence mathematically between a clean 45% and 98% range
+            confidence = min(98.0, max(45.0, item["score"] * 5))
+            display_pct = int(confidence) if confidence.is_integer() else round(confidence, 1)
+            
+            compiled_recs.append({
+                "widget_id": item["widget_id"],
+                "name": item["name"],
+                "confidence": round(confidence, 1),
+                "reason": f"Contextually linked to your current view: share-ratio calculations show a high affinity with your layout's active properties."
+            })
 
     conn.close()
-    return {"recommendations": compiled_recs[:6]}
+    return {"recommendations": compiled_recs[:5]}
+
+@app.post("/api/v1/dashboards/analyze")
+def analyze_dashboard(payload: AnalyzeDashboardPayload):
+    """
+    Runs a single dashboard's current widget set through Claude to get
+    qualitative insights: coverage summary, missing widgets, redundant
+    widgets, and actionable warnings. Scoped to exactly the widgets passed
+    in, so each dashboard gets its own independent analysis.
+    """
+    if not payload.widgets:
+        return {"status": "error", "message": "This dashboard has no widgets to analyze yet."}
+
+    if not gemini_client:
+        return {"status": "error", "message": "AI analysis is not configured. Set GEMINI_API_KEY in the backend environment."}
+
+    widget_lines = "\n".join(f"- {w.name} (id: {w.id})" for w in payload.widgets)
+
+    prompt = f"""You are a monitoring/observability expert reviewing ONE dashboard in isolation.
+
+Dashboard name: {payload.dashboard_name}
+Dashboard category: {payload.category}
+Widgets currently on this dashboard:
+{widget_lines}
+
+Analyze only this dashboard. Respond with ONLY valid JSON (no markdown fences, no preamble, no trailing commentary) in exactly this shape:
+{{
+  "summary": "one or two sentence overview of what this dashboard currently covers well",
+  "gaps": [{{"name": "suggested widget/metric name", "reason": "why it would help this dashboard"}}],
+  "redundancies": [{{"widgets": ["widget name 1", "widget name 2"], "reason": "why they overlap"}}],
+  "warnings": ["short actionable warning string"]
+}}
+
+Rules:
+- "gaps": 2-4 realistic, specific metrics missing for a "{payload.category}" dashboard. Empty list if genuinely well covered.
+- "redundancies": only include real overlaps. Empty list if none.
+- "warnings": 0-3 short, concrete, actionable items (e.g. missing an error-rate or alerting widget on a critical dashboard). Empty list if none.
+"""
+
+    try:
+        response = gemini_client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+        raw_text = (response.text or "").strip()
+        raw_text = raw_text.replace("```json", "").replace("```", "").strip()
+        analysis = json.loads(raw_text)
+        return {"status": "success", "dashboard_name": payload.dashboard_name, "analysis": analysis}
+    except json.JSONDecodeError:
+        return {"status": "error", "message": "AI response could not be parsed. Please try again."}
+    except Exception as e:
+        return {"status": "error", "message": f"AI analysis failed: {str(e)}"}
+
+@app.post("/api/v1/dashboards/suggest-widgets")
+def suggest_widgets_for_new_dashboard(payload: SuggestWidgetsPayload):
+    """
+    Helps someone building a brand-new dashboard who isn't sure what to put on it.
+    Infers likely intent from the dashboard NAME (category is secondary context)
+    and returns a starter set of widgets in the same shape the Step 2 bundle UI expects.
+    """
+    dashboard_name = (payload.dashboard_name or "").strip()
+    if not dashboard_name:
+        return {"status": "error", "message": "Dashboard name is required."}
+
+    if not gemini_client:
+        return {"status": "error", "message": "AI suggestions are not configured. Set GEMINI_API_KEY in the backend environment."}
+
+    category = (payload.category or "general").strip() or "general"
+
+    prompt = f"""You are a monitoring/observability expert helping someone set up a brand-new dashboard from scratch.
+
+Dashboard name: {dashboard_name}
+Dashboard type/category (secondary context, may be generic): {category}
+
+Infer what this dashboard is likely meant to monitor primarily from its NAME, and suggest a practical starter set of widgets for it. Respond with ONLY valid JSON (no markdown fences, no preamble, no trailing commentary) in exactly this shape:
+{{
+  "widgets": [{{"name": "widget/metric name", "reason": "one short sentence on why it fits this dashboard"}}]
+}}
+
+Rules:
+- Suggest 5 to 8 widgets, ordered from most to least essential.
+- Be specific and realistic (e.g. "CPU Utilization", "Error Rate (5xx)", "Requests Per Minute") rather than vague placeholders.
+- Base your inference primarily on the dashboard NAME; use the category only as secondary context.
+"""
+
+    try:
+        response = gemini_client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+        raw_text = (response.text or "").strip()
+        raw_text = raw_text.replace("```json", "").replace("```", "").strip()
+        parsed = json.loads(raw_text)
+        suggested = parsed.get("widgets", [])
+
+        formatted = []
+        for i, w in enumerate(suggested):
+            w_name = (w.get("name") or "").strip()
+            if not w_name:
+                continue
+            formatted.append({
+                "widget_id": f"ai_suggested_{slugify_widget_name(w_name)}_{i}",
+                "name": w_name,
+                "reason": w.get("reason", "")
+            })
+
+        if not formatted:
+            return {"status": "error", "message": "AI did not return any usable widget suggestions."}
+
+        return {"status": "success", "widgets": formatted}
+    except json.JSONDecodeError:
+        return {"status": "error", "message": "AI response could not be parsed. Please try again."}
+    except Exception as e:
+        return {"status": "error", "message": f"AI suggestion failed: {str(e)}"}
 
 if __name__ == "__main__":
     import uvicorn

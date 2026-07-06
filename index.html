@@ -57,6 +57,8 @@
 
         .search-item-row { padding: 9px 16px; font-size: 12.5px; color: #ccd9ef; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid transparent; transition: background .15s; }
         .search-item-row:hover { background: var(--sidebar-hover); border-left-color: var(--primary); color: #fff; }
+        .search-item-row.active-selected { background: var(--sidebar-active); border-left-color: var(--primary); color: #fff; font-weight: 700; }
+        .search-item-row.active-selected .search-item-active-tick { color: #7fd4a8; font-size: 11px; margin-right: 6px; }
         .search-delete-x-btn { background: none; border: none; color: #56658c; font-weight: bold; font-size: 12px; padding: 2px 6px; cursor: pointer; border-radius: 4px; transition: 0.1s; }
         .search-delete-x-btn:hover { background: rgba(229,62,62,0.18); color: #ff8080; }
 
@@ -82,6 +84,25 @@
 
         .workspace-title-header-bar { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 24px; display: none; align-items: center; gap: 10px; flex-shrink: 0; }
         .active-dashboard-pill-badge { background: var(--primary-light); border: 1.5px solid rgba(32,102,228,0.25); color: var(--primary); font-weight: 700; font-size: 13px; padding: 6px 14px; border-radius: 20px; letter-spacing: 0.3px; }
+
+        .btn-analyze-dash { margin-left: auto; background: linear-gradient(135deg,#0f766e,#18a058); color: #fff; border: none; padding: 6px 12px; border-radius: 7px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; transition: 0.15s; display: flex; align-items: center; gap: 6px; text-transform: none; letter-spacing: normal; }
+        .btn-analyze-dash:hover { filter: brightness(1.08); }
+        .btn-analyze-dash:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .analyze-section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.7px; font-weight: 700; color: var(--muted); margin: 14px 0 7px; }
+        .analyze-section-label:first-child { margin-top: 0; }
+        .analyze-summary-text { font-size: 12px; color: var(--text); line-height: 1.5; background: var(--primary-light); padding: 10px 12px; border-radius: 9px; border: 1px solid rgba(32,102,228,0.18); }
+        .analyze-gap-card { background: var(--bg); border: 1px solid var(--border); border-left: 3px solid var(--up); border-radius: 8px; padding: 10px 11px; margin-bottom: 8px; }
+        .analyze-gap-card h5 { font-size: 12px; color: var(--text); font-weight: 700; }
+        .analyze-gap-card p { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+        .analyze-redundancy-card { background: var(--bg); border: 1px solid var(--border); border-left: 3px solid var(--warn); border-radius: 8px; padding: 10px 11px; margin-bottom: 8px; }
+        .analyze-redundancy-card h5 { font-size: 12px; color: var(--text); font-weight: 700; }
+        .analyze-redundancy-card p { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+        .analyze-warning-row { display: flex; gap: 7px; font-size: 11.5px; color: var(--text); background: rgba(229,62,62,0.06); border: 1px solid rgba(229,62,62,0.2); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; line-height: 1.4; }
+        .analyze-empty-note { font-size: 11.5px; color: var(--muted); font-style: italic; }
+        .btn-add-gap { background: transparent; color: var(--up); border: 1.5px solid var(--up); width: 100%; padding: 6px; border-radius: 6px; font-weight: 600; font-size: 11px; cursor: pointer; margin-top: 7px; font-family: inherit; transition: 0.15s; }
+        .btn-add-gap:hover { background: var(--up); color: #fff; }
+        .btn-add-gap:disabled { opacity: 0.55; cursor: default; background: transparent; color: var(--muted); border-color: var(--border); }
 
         .canvas-grid { flex: 1; padding: 20px 24px 25px 24px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; align-content: flex-start; }
         .step1-lock-hint { grid-column: 1/-1; text-align: center; color: var(--muted); margin-top: 90px; background: var(--card); padding: 44px; border-radius: 14px; border: 2px dashed var(--border); max-width: 600px; margin-left: auto; margin-right: auto; }
@@ -143,7 +164,7 @@
     </div>
 
     <nav>
-        <div style="display: flex; align-items: center; gap: 14px;">
+        <div style="display: flex; align-items: center; gap: 14px; cursor: pointer;" onclick="goToHomeWorkspace()" title="Back to home">
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCmqXRS2g4-R148UGJpn9I-7J8JMouhVAb2xXk1D-Unw&s=10" alt="Site24x7 Logo" style="height: 24px; width: auto; display: block;">
             <div class="logo" id="logo-branding-bar">⚡ Multi-Stage Recommendation Engine</div>
         </div>
@@ -196,15 +217,19 @@
             <div class="rec-container" id="peer-dashboard-suggestions-panel" style="border-bottom: 8px solid var(--bg);">
                 <div class="locked-placeholder">Log in to view metrics tracking insights...</div>
             </div>
-            <div class="sidebar-header">💡 Step 3: Adaptive Cross-Pairings</div>
-            <div class="rec-container" id="recommendations-panel">
-                <div class="locked-placeholder">Awaiting Step 1 completion...</div>
+            <div class="sidebar-header" style="display:flex; align-items:center; justify-content:space-between; gap:8px; color: #0f766e;">
+                <span>🧠 AI Dashboard Analysis</span>
+                <button class="btn-analyze-dash" id="analyze-dash-btn" onclick="analyzeDashboard()">Analyze</button>
+            </div>
+            <div class="rec-container" id="ai-analysis-panel">
+                <div class="locked-placeholder">Select or build a dashboard, then click Analyze for AI-powered insights on this dashboard's widgets.</div>
             </div>
         </aside>
     </div>
 
     <script>
         let currentDashboardWidgets = [];
+        let lastAnalysisResult      = null;
         let fetchedDefaultsBuffer   = [];
         let activeCategoryTag       = "";
         let customDebounceTimer     = null;
@@ -287,9 +312,10 @@
 
             let html = '';
             filtered.forEach(d => {
+                const isActive = activeDashboardId && d.id === activeDashboardId;
                 html += `
-                    <div class="search-item-row" onclick="selectDashboardFromSearch('${escAttr(d.id)}', '${escAttr(d.category)}')">
-                        <span>${escHTML(d.name)}</span>
+                    <div class="search-item-row ${isActive ? 'active-selected' : ''}" onclick="selectDashboardFromSearch('${escAttr(d.id)}', '${escAttr(d.category)}')">
+                        <span>${isActive ? '<span class="search-item-active-tick">●</span>' : ''}${escHTML(d.name)}</span>
                         <button class="search-delete-x-btn" onclick="removeDashboardFromDatabase(event, '${escAttr(d.id)}')" title="Delete Permanent Template">✕</button>
                     </div>`;
             });
@@ -359,10 +385,10 @@
             const chosenName = profile ? profile.name : "Custom View";
 
             document.getElementById('dashboard-search-bar').value = chosenName;
-            document.getElementById('search-dropdown-panel').style.display = 'none';
             activeCategoryTag   = category;
             activeDashboardId   = templateId;
             activeDashboardName = chosenName;
+            handleSearchFiltering(chosenName);
 
             document.getElementById('custom-dash-name').style.display      = 'none';
             document.getElementById('custom-dash-type-text').style.display  = 'none';
@@ -382,7 +408,8 @@
                     currentDashboardWidgets = fetchedDefaultsBuffer.map(item => ({ id: item.widget_id, name: item.name, renderType: 'bar' }));
                     document.getElementById('bundle-banner').style.display = 'none';
                     renderCanvas();
-                    fetchRecommendations();
+                    lastAnalysisResult = null;
+                    refreshAnalysisPanelState();
                 } else {
                     document.getElementById('bundle-banner-title').innerText = `Step 2: Mapped Core Suggestions for "${chosenName}"`;
                     renderStep2BundleBanner();
@@ -400,13 +427,37 @@
                 if (res.status === 200) {
                     document.getElementById('dashboard-search-bar').value = '';
                     currentDashboardWidgets = [];
+                    activeDashboardId = "";
+                    activeDashboardName = "";
                     renderCanvas();
                     document.getElementById('bundle-banner').style.display = 'none';
                     document.getElementById('workspace-active-title-bar').style.display = 'none';
                     document.getElementById('save-dash-btn').style.display = 'none';
+                    lastAnalysisResult = null;
+                    refreshAnalysisPanelState();
                     await initStudio();
                 }
             } catch (err) { alert(err); }
+        }
+
+        function goToHomeWorkspace() {
+            document.getElementById('dashboard-search-bar').value = '';
+            document.getElementById('search-dropdown-panel').style.display = 'none';
+            document.getElementById('bundle-banner').style.display = 'none';
+            document.getElementById('workspace-active-title-bar').style.display = 'none';
+            document.getElementById('custom-dash-name').style.display = 'none';
+            document.getElementById('custom-dash-type-text').style.display = 'none';
+            document.getElementById('save-dash-btn').style.display = 'none';
+
+            currentDashboardWidgets = [];
+            activeDashboardId   = "";
+            activeDashboardName = "";
+            activeCategoryTag   = "";
+            lastAnalysisResult  = null;
+
+            renderCanvas();
+            refreshAnalysisPanelState();
+            handleSearchFiltering('');
         }
 
         function activateCustomFlowUI() {
@@ -420,17 +471,57 @@
             document.getElementById('save-dash-btn').style.display         = 'block';
             activeDashboardId   = "";
             activeDashboardName = "";
+            lastAnalysisResult = null;
+            refreshAnalysisPanelState();
+            handleSearchFiltering(document.getElementById('dashboard-search-bar').value);
 
-            document.getElementById('custom-dash-type-text').oninput = function() {
-                clearTimeout(customDebounceTimer);
-                customDebounceTimer = setTimeout(() => {
-                    activeCategoryTag = this.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '_') || "general";
-                    const dashName = document.getElementById('custom-dash-name').value.trim() || "Custom Dashboard";
-                    document.getElementById('active-dashboard-display-name').innerText = `🛠️ ${dashName} (${activeCategoryTag})`;
-                    document.getElementById('workspace-active-title-bar').style.display = 'flex';
-                    triggerStep2Fetch(activeCategoryTag, dashName, slugifyCustomDashboardName(dashName));
-                }, 400);
-            };
+            document.getElementById('custom-dash-name').oninput      = handleCustomDashboardFieldChange;
+            document.getElementById('custom-dash-type-text').oninput = handleCustomDashboardFieldChange;
+        }
+
+        function handleCustomDashboardFieldChange() {
+            clearTimeout(customDebounceTimer);
+            customDebounceTimer = setTimeout(() => {
+                const dashName = document.getElementById('custom-dash-name').value.trim();
+                const typeText = document.getElementById('custom-dash-type-text').value.trim();
+                if (typeText) {
+                    activeCategoryTag = typeText.toLowerCase().replace(/[^a-z0-9]/g, '_') || "general";
+                }
+
+                if (!dashName) {
+                    document.getElementById('bundle-options-container').innerHTML = '<span style="font-size:12px; color:#94a3b8;">Type a dashboard name to get AI widget suggestions...</span>';
+                    document.getElementById('bundle-banner').style.display = 'flex';
+                    return;
+                }
+
+                document.getElementById('active-dashboard-display-name').innerText = `🛠️ ${dashName}${activeCategoryTag ? ' (' + activeCategoryTag + ')' : ''}`;
+                document.getElementById('workspace-active-title-bar').style.display = 'flex';
+                fetchAISuggestedWidgets(dashName, activeCategoryTag || 'general', slugifyCustomDashboardName(dashName));
+            }, 450);
+        }
+
+        async function fetchAISuggestedWidgets(dashName, category, templateId) {
+            document.getElementById('bundle-banner-title').innerText = `Step 2: AI-Suggested Widgets for "${dashName}"`;
+            document.getElementById('bundle-options-container').innerHTML = '<span style="font-size:12px; color:#94a3b8;">✨ Thinking of widgets for this dashboard...</span>';
+            document.getElementById('bundle-banner').style.display = 'flex';
+
+            try {
+                const res = await fetch('http://127.0.0.1:8000/api/v1/dashboards/suggest-widgets', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dashboard_name: dashName, category })
+                });
+                const data = await res.json();
+
+                if (data.status === 'success' && data.widgets && data.widgets.length > 0) {
+                    fetchedDefaultsBuffer = data.widgets;
+                    renderStep2BundleBanner();
+                } else {
+                    // AI unavailable or nothing returned — fall back to the plain category lookup
+                    await triggerStep2Fetch(category, dashName, templateId);
+                }
+            } catch (err) {
+                await triggerStep2Fetch(category, dashName, templateId);
+            }
         }
 
         async function triggerStep2Fetch(category, dashboardDisplayName, templateId) {
@@ -444,14 +535,14 @@
             const banner = document.getElementById('bundle-banner');
             const container = document.getElementById('bundle-options-container');
             if (!fetchedDefaultsBuffer || fetchedDefaultsBuffer.length === 0) {
-                container.innerHTML = '<span style="font-size:12px; color:#94a3b8;">Type a context name to load starter tracks...</span>';
+                container.innerHTML = '<span style="font-size:12px; color:#94a3b8;">Type a dashboard name to load starter tracks...</span>';
                 banner.style.display = 'flex';
                 return;
             }
             let html = '';
             fetchedDefaultsBuffer.forEach((item, index) => {
                 html += `
-                    <label class="checkbox-container">
+                    <label class="checkbox-container" ${item.reason ? `title="${escAttr(item.reason)}"` : ''}>
                         <input type="checkbox" id="chk-def-${index}" value="${escAttr(item.widget_id)}" data-name="${escAttr(item.name)}" checked>
                         <span>${escHTML(item.name)}</span>
                     </label>`;
@@ -469,7 +560,8 @@
             });
             document.getElementById('bundle-banner').style.display = 'none';
             renderCanvas();
-            fetchRecommendations();
+            lastAnalysisResult = null;
+            refreshAnalysisPanelState();
         }
 
         function promptAndInjectCustomWidget() {
@@ -478,20 +570,20 @@
             if (!activeCategoryTag) activeCategoryTag = "general";
             currentDashboardWidgets.push({ id: "manual_widget_" + Date.now(), name: customName.trim(), renderType: 'bar' });
             renderCanvas();
-            fetchRecommendations();
+            refreshAnalysisPanelState();
         }
 
         function addWidget(id, name) {
             if (currentDashboardWidgets.some(w => w.id === id)) return;
             currentDashboardWidgets.push({ id, name, renderType: 'bar' });
             renderCanvas();
-            fetchRecommendations();
+            refreshAnalysisPanelState();
         }
 
         function removeWidget(index) {
             currentDashboardWidgets.splice(index, 1);
             renderCanvas();
-            fetchRecommendations();
+            refreshAnalysisPanelState();
         }
 
         function toggleWidgetVisualType(index, selectedType) {
@@ -525,7 +617,7 @@
                 fetch('http://127.0.0.1:8000/api/v1/widgets/update', {
                     method: 'PUT', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ widget_id: currentDashboardWidgets[index].id, widget_name: clean })
-                }).then(() => fetchRecommendations());
+                }).then(() => refreshAnalysisPanelState());
             }
 
             input.addEventListener('keydown', (e) => { if (e.key === 'Enter') commitRename(true); if (e.key === 'Escape') commitRename(false); });
@@ -661,25 +753,94 @@
             populateRealWidgetGraphs();
         }
 
-        async function fetchRecommendations() {
-            if (!activeCategoryTag) return;
+        async function analyzeDashboard() {
+            const panel = document.getElementById('ai-analysis-panel');
+
+            if (currentDashboardWidgets.length === 0) {
+                panel.innerHTML = '<div class="locked-placeholder">Add at least one widget to this dashboard before running an analysis.</div>';
+                return;
+            }
+
+            const dashboardName = activeDashboardId ? activeDashboardName : (document.getElementById('custom-dash-name').value.trim() || "Custom Dashboard");
+            const btn = document.getElementById('analyze-dash-btn');
+
+            panel.innerHTML = `<div class="locked-placeholder">Analyzing "${escHTML(dashboardName)}"...</div>`;
+            btn.disabled = true;
+
             try {
-                const res = await fetch(`http://127.0.0.1:8000/api/v1/recommendations?category=${activeCategoryTag}`);
+                const widgetsPayload = currentDashboardWidgets.map(w => ({ id: w.id, name: w.name }));
+                const res = await fetch('http://127.0.0.1:8000/api/v1/dashboards/analyze', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dashboard_name: dashboardName, category: activeCategoryTag || 'general', widgets: widgetsPayload })
+                });
                 const data = await res.json();
-                let html = '';
-                data.recommendations.forEach(rec => {
+
+                if (data.status !== 'success') {
+                    panel.innerHTML = `<div class="analyze-warning-row">⚠️ ${escHTML(data.message || 'Analysis failed.')}</div>`;
+                    return;
+                }
+                renderAnalysisResults(data.analysis);
+            } catch (err) {
+                panel.innerHTML = `<div class="analyze-warning-row">⚠️ Could not reach the analysis service: ${escHTML(String(err))}</div>`;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function refreshAnalysisPanelState() {
+            if (lastAnalysisResult) {
+                renderAnalysisResults(lastAnalysisResult);
+            } else {
+                document.getElementById('ai-analysis-panel').innerHTML = '<div class="locked-placeholder">Select or build a dashboard, then click Analyze for AI-powered insights on this dashboard\'s widgets.</div>';
+            }
+        }
+
+        function renderAnalysisResults(analysis) {
+            lastAnalysisResult = analysis;
+            const panel = document.getElementById('ai-analysis-panel');
+            let html = '';
+
+            html += `<div class="analyze-section-label">Overview</div>`;
+            html += `<div class="analyze-summary-text">${escHTML(analysis.summary || 'No summary available.')}</div>`;
+
+            html += `<div class="analyze-section-label">Suggested Additions</div>`;
+            if (analysis.gaps && analysis.gaps.length > 0) {
+                analysis.gaps.forEach(g => {
+                    const alreadyAdded = currentDashboardWidgets.some(w => w.name.trim().toLowerCase() === g.name.trim().toLowerCase());
+                    const genId = 'ai_suggested_' + g.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_') + '_' + Date.now();
                     html += `
-                        <div class="amazon-rec-card">
-                            <span class="rec-badge">${rec.confidence}% Match</span>
-                            <div>
-                                <h5 style="font-size:12px; color:#1a2033; font-weight:700;">${escHTML(rec.name)}</h5>
-                                <p style="font-size:11px; color:#64748b; margin-top:2px;">${escHTML(rec.reason)}</p>
-                            </div>
-                            <button class="btn-add-rec" onclick="addWidget('${escAttr(rec.widget_id)}', '${escAttr(rec.name)}')">Add Metric Component</button>
+                        <div class="analyze-gap-card">
+                            <h5>➕ ${escHTML(g.name)}</h5>
+                            <p>${escHTML(g.reason)}</p>
+                            <button class="btn-add-gap" ${alreadyAdded ? 'disabled' : ''} onclick="addWidget('${escAttr(genId)}', '${escAttr(g.name)}')">
+                                ${alreadyAdded ? '✓ Already on dashboard' : '+ Add Widget'}
+                            </button>
                         </div>`;
                 });
-                document.getElementById('recommendations-panel').innerHTML = html || '<div class="locked-placeholder">No options matching environment.</div>';
-            } catch (error) { console.error(error); }
+            } else {
+                html += `<div class="analyze-empty-note">No obvious gaps found — this dashboard looks well covered.</div>`;
+            }
+
+            html += `<div class="analyze-section-label">Redundancies</div>`;
+            if (analysis.redundancies && analysis.redundancies.length > 0) {
+                analysis.redundancies.forEach(r => {
+                    const names = (r.widgets || []).map(escHTML).join(' + ');
+                    html += `<div class="analyze-redundancy-card"><h5>⚠️ ${names}</h5><p>${escHTML(r.reason)}</p></div>`;
+                });
+            } else {
+                html += `<div class="analyze-empty-note">No redundant widgets detected.</div>`;
+            }
+
+            html += `<div class="analyze-section-label">Warnings</div>`;
+            if (analysis.warnings && analysis.warnings.length > 0) {
+                analysis.warnings.forEach(w => {
+                    html += `<div class="analyze-warning-row">🚩 ${escHTML(w)}</div>`;
+                });
+            } else {
+                html += `<div class="analyze-empty-note">No critical warnings.</div>`;
+            }
+
+            panel.innerHTML = html;
         }
 
         async function commitDashboardToDatabase() {
@@ -695,12 +856,13 @@
                 });
                 if(res.ok) {
                     alert(`Configurations persistent under profile context.`);
+                    activeDashboardId = generatedId; activeDashboardName = name;
                     await initStudio();
                     document.getElementById('dashboard-search-bar').value = name;
                     document.getElementById('active-dashboard-display-name').innerText = `📊 ${name}`;
                     document.getElementById('custom-dash-name').style.display = 'none';
                     document.getElementById('custom-dash-type-text').style.display = 'none';
-                    activeDashboardId = generatedId; activeDashboardName = name;
+                    handleSearchFiltering(name);
                 }
             } catch (err) { alert(err); }
         }
