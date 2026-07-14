@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Dashboard Recommendation Engine</title>
+    <title>Dashboard Recommendation Engine</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/widget-recommendation-styles 2.css">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
@@ -26,149 +27,168 @@
             --shadow: 0 2px 8px rgba(0,0,0,0.07);
             --shadow-lg: 0 8px 32px rgba(0,0,0,0.14);
         }
-        body { font-family: 'Inter', sans-serif; display: flex; flex-direction: column; height: 100vh; background-color: var(--bg); color: var(--text); overflow: hidden; }
-
+        html[data-theme="dark"] {
+            --primary: #3b82f6;
+            --primary-hover: #5b93f5;
+            --primary-light: rgba(59,130,246,0.14);
+            --nav: #0d1220;
+            --sidebar: #141b2e;
+            --sidebar-hover: #1c2740;
+            --sidebar-active: #223252;
+            --bg: #0b0e18;
+            --card: #161d30;
+            --border: #2a3450;
+            --text: #e4e9f5;
+            --muted: #8a95b8;
+            --up: #22c56e;
+            --warn: #f0a03f;
+            --down: #f0555f;
+            --shadow: 0 2px 8px rgba(0,0,0,0.35);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.55);
+        }
+        body { font-family: 'Inter', sans-serif; display: flex; flex-direction: column; height: 100vh; background-color: var(--bg); color: var(--text); overflow: hidden; transition: background-color 0.2s ease, color 0.2s ease; }
         .auth-overlay-backdrop { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(10,14,26,0.72); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
         .auth-card-frame { background: var(--card); border: 1px solid var(--border); border-radius: 14px; width: 380px; padding: 34px; box-shadow: var(--shadow-lg); display: flex; flex-direction: column; gap: 18px; }
         .btn-login-submit { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.15s; margin-top: 10px; font-family: inherit; }
         .btn-login-submit:hover { background: var(--primary-hover); }
-
         nav { background: var(--nav); height: 52px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.3); z-index: 200; }
         .logo { font-weight: 700; font-size: 13px; color: #7fa4d0; letter-spacing: 0.3px; }
         .nav-actions { display: flex; gap: 12px; align-items: center; }
         .btn-logout { background: rgba(229,62,62,0.12); color: #ff8080; border: 1.5px solid rgba(229,62,62,0.3); padding: 7px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit; transition: 0.15s; }
         .btn-logout:hover { background: var(--down); color: white; }
-
-        select, input { background: #fff; color: var(--text); border: 1.5px solid var(--border); padding: 8px 13px; border-radius: 8px; font-size: 13px; font-weight: 500; outline: none; font-family: inherit; }
+        select, input { background: var(--card); color: var(--text); border: 1.5px solid var(--border); padding: 8px 13px; border-radius: 8px; font-size: 13px; font-weight: 500; outline: none; font-family: inherit; }
         select:focus, input:focus { border-color: var(--primary); }
-
         .main-frame { display: flex; flex: 1; overflow: hidden; }
         .sidebar-left { width: 270px; background: var(--sidebar); display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden; }
         .sidebar-hd { padding: 16px 16px 12px; border-bottom: 1px solid rgba(255,255,255,.07); }
         .sidebar-hd-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.1px; color: #7fa4d0; font-weight: 700; }
         .sidebar-hd-sub { font-size: 11.5px; color: #4d6080; margin-top: 3px; margin-bottom: 12px; line-height: 1.4; }
-
         .search-container-wrapper { position: relative; width: 100%; }
         #dashboard-search-bar { width: 100%; background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.12); color: #eaf0fb; padding: 9px 13px; }
         #dashboard-search-bar:focus { border-color: var(--primary); background: rgba(255,255,255,.1); }
-
         .search-results-floating-panel { position: static !important; display: block !important; width: 100%; background: transparent !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; }
         .sidebar-scrl { overflow-y: auto; flex: 1; padding: 6px 0; }
-
         .search-item-row { padding: 9px 16px; font-size: 12.5px; color: #ccd9ef; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid transparent; transition: background .15s; }
         .search-item-row:hover { background: var(--sidebar-hover); border-left-color: var(--primary); color: #fff; }
         .search-item-row.active-selected { background: var(--sidebar-active); border-left-color: var(--primary); color: #fff; font-weight: 700; }
         .search-item-row.active-selected .search-item-active-tick { color: #7fd4a8; font-size: 11px; margin-right: 6px; }
         .search-delete-x-btn { background: none; border: none; color: #56658c; font-weight: bold; font-size: 12px; padding: 2px 6px; cursor: pointer; border-radius: 4px; transition: 0.1s; }
         .search-delete-x-btn:hover { background: rgba(229,62,62,0.18); color: #ff8080; }
-
         .search-trash-trigger-option { padding: 10px 16px; font-size: 11px; font-weight: 700; color: var(--warn); text-align: center; border-top: 1px solid rgba(255,255,255,.07); background: rgba(240,136,42,0.08); cursor: pointer; margin-top: 4px; }
         .search-trash-trigger-option:hover { background: rgba(240,136,42,0.16); }
-
         .sidebar-ft { padding: 14px 16px 16px; border-top: 1px solid rgba(255,255,255,.07); display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
         .sidebar-ft-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; color: #4d6080; font-weight: 700; margin-bottom: 2px; }
-
         .btn-custom { background: rgba(255,255,255,.06); color: #cfdcf5; border: 1.5px solid rgba(255,255,255,.16); padding: 9px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 500; cursor: pointer; font-family: inherit; transition: 0.15s; width: 100%; text-align: left; }
         .btn-custom:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.3); }
         .btn-direct-add { background: linear-gradient(135deg,#7c3aed,#2066e4); color: white; border: none; padding: 9px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.15s; font-family: inherit; width: 100%; }
         .btn-save { background: var(--up); color: white; border: none; padding: 9px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit; width: 100%; }
-
-        #custom-dash-name, #custom-dash-type-text { width: 100%; }
-
         .workspace-center { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
         .bundle-banner { background: var(--card); border-bottom: 1px solid var(--border); padding: 18px 24px; display: none; flex-direction: column; gap: 12px; }
         .bundle-title { font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.6px; }
         .bundle-options { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; max-height: 120px; overflow-y: auto; padding: 3px; }
         .checkbox-container { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 500; cursor: pointer; background: var(--primary-light); color: var(--primary); padding: 7px 13px; border-radius: 20px; border: 1.5px solid rgba(32,102,228,0.25); white-space: nowrap; }
         .btn-bundle { background: var(--primary); color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; margin-left: auto; font-family: inherit; }
-
         .workspace-title-header-bar { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 24px; display: none; align-items: center; gap: 10px; flex-shrink: 0; }
         .active-dashboard-pill-badge { background: var(--primary-light); border: 1.5px solid rgba(32,102,228,0.25); color: var(--primary); font-weight: 700; font-size: 13px; padding: 6px 14px; border-radius: 20px; letter-spacing: 0.3px; }
-
-        .btn-analyze-dash { margin-left: auto; background: linear-gradient(135deg,#0f766e,#18a058); color: #fff; border: none; padding: 6px 12px; border-radius: 7px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; transition: 0.15s; display: flex; align-items: center; gap: 6px; text-transform: none; letter-spacing: normal; }
-        .btn-analyze-dash:hover { filter: brightness(1.08); }
-        .btn-analyze-dash:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        .analyze-section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.7px; font-weight: 700; color: var(--muted); margin: 14px 0 7px; }
-        .analyze-section-label:first-child { margin-top: 0; }
-        .analyze-summary-text { font-size: 12px; color: var(--text); line-height: 1.5; background: var(--primary-light); padding: 10px 12px; border-radius: 9px; border: 1px solid rgba(32,102,228,0.18); }
-        .analyze-gap-card { background: var(--bg); border: 1px solid var(--border); border-left: 3px solid var(--up); border-radius: 8px; padding: 10px 11px; margin-bottom: 8px; }
-        .analyze-gap-card h5 { font-size: 12px; color: var(--text); font-weight: 700; }
-        .analyze-gap-card p { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
-        .analyze-redundancy-card { background: var(--bg); border: 1px solid var(--border); border-left: 3px solid var(--warn); border-radius: 8px; padding: 10px 11px; margin-bottom: 8px; }
-        .analyze-redundancy-card h5 { font-size: 12px; color: var(--text); font-weight: 700; }
-        .analyze-redundancy-card p { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
-        .analyze-warning-row { display: flex; gap: 7px; font-size: 11.5px; color: var(--text); background: rgba(229,62,62,0.06); border: 1px solid rgba(229,62,62,0.2); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; line-height: 1.4; }
-        .analyze-empty-note { font-size: 11.5px; color: var(--muted); font-style: italic; }
-        .btn-add-gap { background: transparent; color: var(--up); border: 1.5px solid var(--up); width: 100%; padding: 6px; border-radius: 6px; font-weight: 600; font-size: 11px; cursor: pointer; margin-top: 7px; font-family: inherit; transition: 0.15s; }
-        .btn-add-gap:hover { background: var(--up); color: #fff; }
-        .btn-add-gap:disabled { opacity: 0.55; cursor: default; background: transparent; color: var(--muted); border-color: var(--border); }
-
         .canvas-grid { flex: 1; padding: 20px 24px 25px 24px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; align-content: flex-start; }
         .step1-lock-hint { grid-column: 1/-1; text-align: center; color: var(--muted); margin-top: 90px; background: var(--card); padding: 44px; border-radius: 14px; border: 2px dashed var(--border); max-width: 600px; margin-left: auto; margin-right: auto; }
         .empty-hint { grid-column: 1/-1; text-align: center; color: var(--muted); margin-top: 100px; }
-
         .widget-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px; position: relative; height: 185px; display: flex; flex-direction: column; justify-content: space-between; }
         .close-btn { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 50%; background: none; border: none; color: #c3cbd9; cursor: pointer; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
         .close-btn:hover { color: #fff; background: var(--down); }
-
         .editable-widget-heading { font-size:12.5px; margin-top:2px; color:var(--text); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor: pointer; padding: 3px 5px; border-radius: 5px; }
         .editable-widget-heading:hover { background: var(--primary-light); color: var(--primary); }
-
         .chart-mock-box { height: 80px; background: var(--bg); border-radius: 8px; display: flex; align-items: center; justify-content: space-around; padding: 10px; border: 1px solid var(--border); overflow: hidden; }
         .simplified-bar-container { display: flex; align-items: flex-end; justify-content: center; gap: 16px; width: 100%; height: 100%; padding-top: 5px; }
         .chart-bar { width: 22px; background: linear-gradient(to top, #2066e4, #7c9ff5); border-radius: 4px 4px 0 0; min-height: 6px; transition: height 0.4s ease; }
-
         .kpi-value-text { font-size: 26px; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
         .kpi-unit { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: 2px; }
-
         .pie-chart-circle { width: 52px; height: 52px; border-radius: 50%; position: relative; transition: background 0.4s ease; }
         .pie-chart-circle::after { content: ''; position: absolute; width: 31px; height: 31px; background: var(--bg); border-radius: 50%; top: 10.5px; left: 10.5px; }
-
         .widget-controls { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); margin-top: 2px; }
         .type-select-mini { background: var(--bg); color: var(--muted); border: 1.5px solid var(--border); font-size: 10px; padding: 3px 5px; border-radius: 6px; cursor: pointer; font-family: inherit; }
-
         .sidebar-right { width: 320px; background: var(--card); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; }
         .sidebar-header { padding: 14px 18px; font-weight: 700; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--warn); border-bottom: 1px solid var(--border); background: var(--card); position: sticky; top: 0; z-index: 10; }
         .rec-container { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
-
         .amazon-rec-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; position: relative; }
         .rec-badge { position: absolute; top: 14px; right: 14px; background: var(--warn); color: #fff; font-size: 9px; font-weight: 700; padding: 3px 6px; border-radius: 8px; }
         .btn-add-rec { background: transparent; color: var(--warn); border: 1.5px solid var(--warn); width: 100%; padding: 8px; border-radius: 7px; font-weight: 600; font-size: 12px; cursor: pointer; margin-top: 5px; font-family: inherit; transition: 0.15s; }
         .btn-add-rec:hover { background: var(--warn); color: #fff; }
-
         .locked-placeholder { text-align: center; color: var(--muted); font-size: 13px; font-style: italic; padding: 24px; line-height: 1.6; }
-        .widget-rename-input { font-size:12.5px; font-weight:600; color:var(--text); background:#fff; border:1.5px solid var(--primary); border-radius:6px; padding:3px 7px; width:100%; outline:none; box-shadow: 0 0 0 3px var(--primary-light); font-family: inherit; }
-
+        .widget-rename-input { font-size:12.5px; font-weight:600; color:var(--text); background:var(--card); border:1.5px solid var(--primary); border-radius:6px; padding:3px 7px; width:100%; outline:none; box-shadow: 0 0 0 3px var(--primary-light); font-family: inherit; }
+        .aw-modal-backdrop { position: fixed; inset: 0; background: rgba(10,14,26,0.6); z-index: 5000; display: none; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto; }
+        .aw-modal-backdrop.active { display: flex; }
+        .aw-modal { background: var(--card); border-radius: 14px; width: 640px; max-width: 100%; box-shadow: var(--shadow-lg); }
+        .aw-modal-hd { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+        .aw-modal-hd h3 { font-size: 17px; font-weight: 700; }
+        .aw-modal-hd button { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--muted); }
+        .aw-modal-body { padding: 20px 22px; max-height: 70vh; overflow-y: auto; }
         @keyframes pulse {
             0% { transform: scale(1); opacity: 0.7; }
             50% { transform: scale(1.08); opacity: 1; }
             100% { transform: scale(1); opacity: 0.7; }
         }
         #loading-overlay.active { display: flex !important; }
+
+        /* ---- Theme toggle ---- */
+        .btn-theme-toggle { background: rgba(255,255,255,.08); color: #cfdcf5; border: 1.5px solid rgba(255,255,255,.16); width: 32px; height: 32px; border-radius: 8px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.15s; }
+        .btn-theme-toggle:hover { background: rgba(255,255,255,.16); }
+
+        /* ---- AI Analysis floating action button (no sidebar scrolling required) ---- */
+        .fab-ai-analyze { position: fixed; bottom: 26px; right: 344px; width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg,#7c3aed,#2066e4); color: #fff; border: none; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 400; display: flex; align-items: center; justify-content: center; transition: 0.15s; }
+        .fab-ai-analyze:hover { transform: scale(1.08); }
+
+        /* ---- Skeleton loaders ---- */
+        @keyframes skeleton-shimmer {
+            0% { background-position: -200px 0; }
+            100% { background-position: calc(200px + 100%) 0; }
+        }
+        .skeleton-shimmer-bg { background: linear-gradient(90deg, var(--border) 0px, rgba(150,165,200,0.25) 40px, var(--border) 80px); background-size: 400px 100%; animation: skeleton-shimmer 1.4s ease-in-out infinite; }
+        .skeleton-rec-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+        .skeleton-line { height: 11px; border-radius: 5px; }
+        .skeleton-card-shell { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px; height: 185px; display: flex; flex-direction: column; justify-content: space-between; }
+        .skeleton-card-shell .skeleton-chart { height: 80px; border-radius: 8px; }
+
+        /* ---- Drag-and-drop reordering ---- */
+        .widget-card[draggable="true"] { cursor: grab; }
+        .widget-card.dragging { opacity: 0.4; cursor: grabbing; }
+        .widget-card.drag-over { outline: 2px dashed var(--primary); outline-offset: 2px; }
+        .drag-handle { position: absolute; top: 10px; left: 10px; color: #c3cbd9; font-size: 12px; cursor: grab; user-select: none; }
+
+        /* ---- AI Dashboard Analysis panel ---- */
+        .ai-analyze-btn { background: linear-gradient(135deg,#7c3aed,#2066e4); color: #fff; border: none; padding: 10px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; width: 100%; font-family: inherit; transition: 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .ai-analyze-btn:hover { filter: brightness(1.08); }
+        .ai-analyze-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .ai-summary-box { background: var(--primary-light); border: 1.5px solid rgba(32,102,228,0.25); border-radius: 10px; padding: 12px; font-size: 12px; line-height: 1.5; color: var(--text); }
+        .ai-section-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; color: var(--muted); margin: 14px 0 6px; }
+        .ai-gap-card, .ai-redundancy-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 10px; padding: 11px 12px; display: flex; flex-direction: column; gap: 5px; margin-bottom: 8px; }
+        .ai-gap-catalog-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 6px; background: rgba(24,160,88,0.14); color: var(--up); display: inline-block; }
+        .ai-gap-nocatalog-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 6px; background: rgba(107,121,153,0.16); color: var(--muted); display: inline-block; }
+        .ai-warning-line { font-size: 11.5px; color: var(--down); background: rgba(229,62,62,0.08); border: 1px solid rgba(229,62,62,0.2); border-radius: 8px; padding: 8px 10px; margin-bottom: 6px; line-height: 1.4; }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #1c2340; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; display: none; transition: opacity 0.2s ease;">
+    <div id="loading-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #1c2340; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; display: none;">
         <div style="color: #7aadff; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; animation: pulse 1.5s infinite ease-in-out;">Syncing Workspace Metrics...</div>
     </div>
 
     <div class="auth-overlay-backdrop" id="auth-layer-panel">
         <div class="auth-card-frame" style="text-align: center; padding: 40px 30px;">
-            <h3 style="color: var(--primary); text-align: center; font-weight: 700;">🔒 Enterprise Login Portal</h3>
-            <p style="font-size: 12px; color: var(--muted); text-align: center; margin-top: -8px;">Site24x7 Shared Pipeline Workspace</p>
-            <p style="font-size: 13px; color: var(--muted); line-height: 1.6; margin: 15px 0 5px 0;">Workspace environments are securely configured via identity profiles. Please authorize access to proceed.</p>
+            <h3 style="color: var(--primary); font-weight: 700;">🔒 Enterprise Login Portal</h3>
+            <p style="font-size: 12px; color: var(--muted); margin-top: -8px;">Site24x7 Shared Pipeline Workspace</p>
             <button class="btn-login-submit" style="width: 100%; padding: 14px;" onclick="executeSessionAuthentication()">Authenticate Workspace Profile</button>
         </div>
     </div>
 
     <nav>
-        <div style="display: flex; align-items: center; gap: 14px; cursor: pointer;" onclick="goToHomeWorkspace()" title="Back to home">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCmqXRS2g4-R148UGJpn9I-7J8JMouhVAb2xXk1D-Unw&s=10" alt="Site24x7 Logo" style="height: 24px; width: auto; display: block;">
+        <div style="display: flex; align-items: center; gap: 14px; cursor: pointer;" onclick="window.open('https://www.site24x7.com/app/client#/home/dashboards', '_blank', 'noopener')">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCmqXRS2g4-R148UGJpn9I-7J8JMouhVAb2xXk1D-Unw&s=10" alt="Site24x7 Logo" style="height: 24px; width: auto;">
             <div class="logo" id="logo-branding-bar">⚡ Multi-Stage Recommendation Engine</div>
         </div>
         <div class="nav-actions">
+            <button class="btn-theme-toggle" id="theme-toggle-btn" onclick="toggleColorTheme()" title="Toggle dark mode">🌙</button>
+            <button class="btn-logout" id="home-btn" onclick="goToHomeWorkspace()" style="background: var(--bg); color: var(--text); border: 1.5px solid var(--border);">🏠 Home</button>
             <button class="btn-logout" id="logout-btn" style="display:none;" onclick="terminateActiveSessionToken()">Log Out</button>
         </div>
     </nav>
@@ -177,20 +197,20 @@
         <aside class="sidebar-left">
             <div class="sidebar-hd">
                 <div class="sidebar-hd-title">Dashboard Templates</div>
-                <div class="sidebar-hd-sub">Search or select a baseline dashboard to unlock the workspace</div>
+                <div class="sidebar-hd-sub">Search or select a baseline dashboard layout configuration</div>
                 <div class="search-container-wrapper">
                     <input type="text" id="dashboard-search-bar" placeholder="🔍 Search dashboards..." oninput="handleSearchFiltering(this.value)" onfocus="showSearchResultsPanel()" autocomplete="off">
                 </div>
             </div>
             <div class="sidebar-scrl">
-                <div class="search-results-floating-panel" id="search-dropdown-panel"></div>
+                <div class="search-dropdown-panel" id="search-dropdown-panel"></div>
             </div>
             <div class="sidebar-ft">
                 <div class="sidebar-ft-label">Workflow Actions</div>
                 <button class="btn-custom" id="custom-init-btn" onclick="activateCustomFlowUI()">➕ Custom Dashboard</button>
                 <input type="text" id="custom-dash-name" placeholder="Enter Dashboard Name..." style="display:none;">
                 <input type="text" id="custom-dash-type-text" placeholder="Type (e.g., shopping)..." style="display:none;">
-                <button class="btn-direct-add" id="direct-add-widget-btn" onclick="promptAndInjectCustomWidget()">✨ Add Custom Metric</button>
+                <button class="btn-direct-add" id="direct-add-widget-btn" onclick="openAddWidgetModal()">➕ Add Widget</button>
                 <button class="btn-save" id="save-dash-btn" style="display:none;" onclick="commitDashboardToDatabase()">💾 Save Layout Config</button>
             </div>
         </aside>
@@ -201,35 +221,59 @@
                 <div class="bundle-options" id="bundle-options-container"></div>
             </div>
             <div class="workspace-title-header-bar" id="workspace-active-title-bar">
-                <span style="font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Active Workspace Context:</span>
+                <span style="font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase;">Active Workspace Context:</span>
                 <div class="active-dashboard-pill-badge" id="active-dashboard-display-name">None Selected</div>
             </div>
             <div class="canvas-grid" id="canvas-grid">
                 <div class="step1-lock-hint" id="canvas-lock-message">
                     <h3 style="color:var(--text); margin-bottom: 8px;">🔒 Workspace Locked</h3>
-                    <p style="font-size:13px; color:var(--muted);">Step 1 Prerequisite Missing: Please type to search/select a baseline dashboard template or initiate a custom layout config profile on the left to unlock workflow tracks.</p>
+                    <p style="font-size:13px; color:var(--muted);">Select or build a layout metric dashboard sequence to get started.</p>
                 </div>
             </div>
         </div>
 
         <aside class="sidebar-right">
+            <div class="sidebar-header" style="color: var(--warn);">🎯 Recommended Widgets</div>
+            <div class="rec-container" id="recommendations-panel">
+                <div class="locked-placeholder">Add a widget to this dashboard to see live recommendations.</div>
+            </div>
             <div class="sidebar-header" style="color: var(--primary);">👥 Peer Dashboard Suggestions</div>
-            <div class="rec-container" id="peer-dashboard-suggestions-panel" style="border-bottom: 8px solid var(--bg);">
+            <div class="rec-container" id="peer-dashboard-suggestions-panel">
                 <div class="locked-placeholder">Log in to view metrics tracking insights...</div>
-            </div>
-            <div class="sidebar-header" style="display:flex; align-items:center; justify-content:space-between; gap:8px; color: #0f766e;">
-                <span>🧠 AI Dashboard Analysis</span>
-                <button class="btn-analyze-dash" id="analyze-dash-btn" onclick="analyzeDashboard()">Analyze</button>
-            </div>
-            <div class="rec-container" id="ai-analysis-panel">
-                <div class="locked-placeholder">Select or build a dashboard, then click Analyze for AI-powered insights on this dashboard's widgets.</div>
             </div>
         </aside>
     </div>
 
+    <button class="fab-ai-analyze" onclick="openAIAnalysisModal()" title="AI Dashboard Analysis">✨</button>
+
+    <div class="aw-modal-backdrop" id="ai-modal-backdrop">
+        <div class="aw-modal">
+            <div class="aw-modal-hd">
+                <h3>🤖 AI Dashboard Analysis</h3>
+                <button onclick="closeAIAnalysisModal()">✕</button>
+            </div>
+            <div class="aw-modal-body rec-container" id="ai-analysis-panel">
+                <div class="locked-placeholder">Add widgets to this dashboard, then run an analysis for a summary, gap suggestions, and redundancy warnings.</div>
+                <button class="ai-analyze-btn" id="ai-analyze-btn" onclick="analyzeDashboardWithAI()">✨ Analyze Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="aw-modal-backdrop" id="aw-modal-backdrop">
+        <div class="aw-modal">
+            <div class="aw-modal-hd">
+                <h3 id="aw-modal-title">Add Widget</h3>
+                <button onclick="closeAddWidgetModal()">✕</button>
+            </div>
+            <div class="aw-modal-body" id="aw-modal-body">Loading widget catalog…</div>
+        </div>
+    </div>
+
+    <script src="/static/widget-recommendation-engine 2.js"></script>
+    <script src="/static/widget-recommendation-ui 2.js"></script>
+
     <script>
         let currentDashboardWidgets = [];
-        let lastAnalysisResult      = null;
         let fetchedDefaultsBuffer   = [];
         let activeCategoryTag       = "";
         let customDebounceTimer     = null;
@@ -237,13 +281,70 @@
         let activeDashboardId       = "";
         let activeDashboardName     = "";
         let authenticatedUserToken  = "";
+        
+        // Dynamic map layer cache for live telemetry optimization
+        window.activeMonitorMap     = {};
+        let aiAnalysisAddedGaps      = new Set();
 
         function escAttr(val) { return String(val).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
         function escHTML(val) { return String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
         function slugifyCustomDashboardName(name) { return "custom_" + name.toLowerCase().replace(/[^a-z0-9]/g, "_"); }
-
         function showLoadingSpinner() { document.getElementById('loading-overlay').classList.add('active'); }
         function hideLoadingSpinner() { setTimeout(() => { document.getElementById('loading-overlay').classList.remove('active'); }, 400); }
+
+        // ---- Dark mode ----
+        function applyColorTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            const btn = document.getElementById('theme-toggle-btn');
+            if (btn) btn.innerText = theme === 'dark' ? '☀️' : '🌙';
+        }
+        function toggleColorTheme() {
+            const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('site24x7_theme_pref', next);
+            applyColorTheme(next);
+        }
+        function initColorTheme() {
+            const stored = localStorage.getItem('site24x7_theme_pref');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyColorTheme(stored || (prefersDark ? 'dark' : 'light'));
+        }
+
+        // ---- Skeleton loaders (perceived-performance placeholders while data is in flight) ----
+        function renderRecommendationsSkeleton(count) {
+            const panel = document.getElementById('recommendations-panel');
+            let html = '';
+            for (let i = 0; i < (count || 3); i++) {
+                html += `
+                    <div class="skeleton-rec-card">
+                        <div class="skeleton-line skeleton-shimmer-bg" style="width:70%;"></div>
+                        <div class="skeleton-line skeleton-shimmer-bg" style="width:45%; height:8px;"></div>
+                        <div class="skeleton-line skeleton-shimmer-bg" style="width:100%; height:28px; border-radius:7px; margin-top:4px;"></div>
+                    </div>`;
+            }
+            panel.innerHTML = html;
+        }
+        function renderCanvasSkeleton(count) {
+            const grid = document.getElementById('canvas-grid');
+            let html = '';
+            for (let i = 0; i < (count || 4); i++) {
+                html += `
+                    <div class="skeleton-card-shell">
+                        <div class="skeleton-line skeleton-shimmer-bg" style="width:60%;"></div>
+                        <div class="skeleton-chart skeleton-shimmer-bg"></div>
+                        <div class="skeleton-line skeleton-shimmer-bg" style="width:35%; align-self:flex-end;"></div>
+                    </div>`;
+            }
+            grid.innerHTML = html;
+        }
+
+        // ---- Drag-and-drop widget reordering ----
+        function handleWidgetReorder(fromIndex, toIndex) {
+            if (isNaN(fromIndex) || isNaN(toIndex) || fromIndex === toIndex) return;
+            const [moved] = currentDashboardWidgets.splice(fromIndex, 1);
+            currentDashboardWidgets.splice(toIndex, 0, moved);
+            renderCanvas();
+        }
 
         async function checkActiveSessionState() {
             const cache = localStorage.getItem("site24x7_session_user");
@@ -254,12 +355,8 @@
                 document.getElementById("logo-branding-bar").innerText = `⚡ Profile Account: ${authenticatedUserToken.toUpperCase()}`;
                 await initStudio();
                 await fetchPeerDashboardSuggestions();
-                
-                // ─── RUN POLLING THREAD loop every 3s ───
                 setInterval(() => {
-                    if (currentDashboardWidgets.length > 0) {
-                        populateRealWidgetGraphs();
-                    }
+                    if (currentDashboardWidgets.length > 0) { populateRealWidgetGraphs(); renderRealLineCharts(); }
                 }, 3000);
             } else {
                 document.getElementById("auth-layer-panel").style.display = "flex";
@@ -277,7 +374,7 @@
                 const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboards/peer-suggestions?username=${encodeURIComponent(authenticatedUserToken)}`);
                 const suggestions = await res.json();
                 if (!suggestions || suggestions.length === 0) {
-                    panel.innerHTML = '<div class="locked-placeholder" style="color: #64748b;">No recent custom creations saved.</div>';
+                    panel.innerHTML = '<div class="locked-placeholder">No recent custom creations saved.</div>';
                     return;
                 }
                 let html = '';
@@ -285,11 +382,8 @@
                     html += `
                         <div class="amazon-rec-card" style="border: 1px dashed #38bdf8;">
                             <span class="rec-badge" style="background: #38bdf8; color: #0f172a;">From ${escHTML(dash.suggested_from)}</span>
-                            <div>
-                                <span style="font-size:9px; color:#f59e0b; font-weight:700; text-transform:uppercase;">Peer Configuration</span>
-                                <h5 style="font-size:12px; margin-top:3px; color:#1a2033; font-weight:700; line-height:1.4;">${escHTML(dash.name)}</h5>
-                            </div>
-                            <button class="btn-add-rec" style="background: #38bdf8; color: #0f172a;" onclick="selectDashboardFromSearch('${escAttr(dash.id)}', '${escAttr(dash.category)}')">Load Recommended Layout</button>
+                            <h5 style="font-size:12px; font-weight:700;">${escHTML(dash.name)}</h5>
+                            <button class="btn-add-rec" style="background: #38bdf8; color: #0f172a;" onclick="selectDashboardFromSearch('${escAttr(dash.id)}', '${escAttr(dash.category)}')">Load Layout</button>
                         </div>`;
                 });
                 panel.innerHTML = html;
@@ -299,7 +393,7 @@
         async function initStudio() {
             const token = localStorage.getItem("zoho_access_token");
             const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboards`, {
-                method: "GET", headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" }
+                method: "GET", headers: { "Authorization": "Bearer " + token }
             });
             loadedDashboardProfilesMaster = await res.json();
             handleSearchFiltering("");
@@ -309,14 +403,17 @@
             const panel      = document.getElementById('search-dropdown-panel');
             const cleanQuery = searchQuery.trim().toLowerCase();
             const filtered   = loadedDashboardProfilesMaster.filter(d => d.name.toLowerCase().includes(cleanQuery));
-
             let html = '';
             filtered.forEach(d => {
                 const isActive = activeDashboardId && d.id === activeDashboardId;
+                const isLive   = d.source === 'live_sync';
                 html += `
                     <div class="search-item-row ${isActive ? 'active-selected' : ''}" onclick="selectDashboardFromSearch('${escAttr(d.id)}', '${escAttr(d.category)}')">
-                        <span>${isActive ? '<span class="search-item-active-tick">●</span>' : ''}${escHTML(d.name)}</span>
-                        <button class="search-delete-x-btn" onclick="removeDashboardFromDatabase(event, '${escAttr(d.id)}')" title="Delete Permanent Template">✕</button>
+                        <span>${isActive ? '<span class="search-item-active-tick">●</span>' : ''}${escHTML(d.name)}${isLive ? ' <span style="font-size:9px; color:#94a3b8; border:1px solid rgba(255,255,255,.15); border-radius:3px; padding:1px 4px; margin-left:4px;">LIVE</span>' : ''}</span>
+                        ${isLive
+                            ? `<button class="search-delete-x-btn" onclick="hideDashboardFromList(event, '${escAttr(d.id)}')" title="Hide from list (keeps captured data)">🙈</button>`
+                            : `<button class="search-delete-x-btn" onclick="removeDashboardFromDatabase(event, '${escAttr(d.id)}')" title="Delete Template">✕</button>`
+                        }
                     </div>`;
             });
             html += `<div class="search-trash-trigger-option" onclick="toggleRecentlyDeletedView(event)">📂 View Recently Deleted Archetypes</div>`;
@@ -337,33 +434,47 @@
         async function toggleRecentlyDeletedView(event) {
             event.stopPropagation();
             const panel = document.getElementById('search-dropdown-panel');
-            const res   = await fetch('http://127.0.0.1:8000/api/v1/dashboards/recently-deleted');
-            const items = await res.json();
-            if (items.length === 0) {
+            const [delRes, hiddenRes] = await Promise.all([
+                fetch('http://127.0.0.1:8000/api/v1/dashboards/recently-deleted'),
+                fetch('http://127.0.0.1:8000/api/v1/dashboards/hidden')
+            ]);
+            const items  = await delRes.json();
+            const hidden = await hiddenRes.json();
+            if (items.length === 0 && hidden.length === 0) {
                 panel.innerHTML = `
-                    <div style="padding:15px; font-size:11px; color:#64748b; text-align:center; font-style:italic;">No historical hidden logs discovered.</div>
+                    <div style="padding:15px; font-size:11px; text-align:center; font-style:italic;">No historical hidden logs discovered.</div>
                     <div class="search-trash-trigger-option" onclick="handleSearchFiltering('')">⬅ Back to Active Catalog</div>`;
                 return;
             }
-            let html = '<div style="padding: 8px 14px; font-size:10px; font-weight:bold; color:#f59e0b; background:#1e1b4b;">RESTOREABLE LAYOUTS:</div>';
-            items.forEach(d => {
-                html += `
-                    <div class="search-item-row" style="border-left: 2px solid #f59e0b;" onclick="restoreDashboardProfile('${escAttr(d.id)}', '${escAttr(d.name)}', '${escAttr(d.category)}')">
-                        <span>🔄 ${escHTML(d.name)}</span>
-                        <button class="search-delete-x-btn" style="color:#f43f5e;" onclick="purgeDashboardPermanently(event, '${escAttr(d.id)}')" title="Purge Completely">✕ Purge</button>
-                    </div>`;
-            });
+            let html = '';
+            if (items.length > 0) {
+                html += '<div style="padding: 8px 14px; font-size:10px; font-weight:bold; color:#f59e0b; background:#1e1b4b;">RESTOREABLE LAYOUTS:</div>';
+                items.forEach(d => {
+                    html += `
+                        <div class="search-item-row" style="border-left: 2px solid #f59e0b;" onclick="restoreDashboardProfile('${escAttr(d.id)}', '${escAttr(d.name)}', '${escAttr(d.category)}')">
+                            <span>🔄 ${escHTML(d.name)}</span>
+                        </div>`;
+                });
+            }
+            if (hidden.length > 0) {
+                html += '<div style="padding: 8px 14px; font-size:10px; font-weight:bold; color:#94a3b8; background:#1e1b4b;">HIDDEN LIVE DASHBOARDS:</div>';
+                hidden.forEach(d => {
+                    html += `
+                        <div class="search-item-row" style="border-left: 2px solid #94a3b8;" onclick="unhideDashboardFromList(event, '${escAttr(d.id)}')">
+                            <span>👁️ ${escHTML(d.name)}</span>
+                        </div>`;
+                });
+            }
             html += `<div class="search-trash-trigger-option" onclick="handleSearchFiltering('')">⬅ Back to Active Catalog</div>`;
             panel.innerHTML = html;
         }
 
-        async function purgeDashboardPermanently(event, templateId) {
+        async function unhideDashboardFromList(event, templateId) {
             event.stopPropagation();
-            if (!confirm("Are you sure you want to permanently clear this configuration layout configuration tracking matrix?")) return;
             try {
-                const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboards/purge/${templateId}?username=${encodeURIComponent(authenticatedUserToken)}`, { method: 'DELETE' });
-                if (res.status === 200) { toggleRecentlyDeletedView(event); }
-            } catch (err) { console.error(err); }
+                const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboards/unhide/${templateId}`, { method: 'POST' });
+                if ((await res.json()).status === "success") await initStudio();
+            } catch (err) { alert(err); }
         }
 
         async function restoreDashboardProfile(templateId, name, category) {
@@ -379,62 +490,83 @@
             } catch (err) { alert(err); }
         }
 
+        async function refreshActiveMonitorMap() {
+            if (!activeDashboardId) return;
+            const token = localStorage.getItem("zoho_access_token");
+            try {
+                await fetch(`http://127.0.0.1:8000/api/v1/dashboards/${encodeURIComponent(activeDashboardId)}/resolve-monitors`, {
+                    method: 'POST', headers: { "Authorization": "Bearer " + token }
+                });
+                const mapRes = await fetch(`http://127.0.0.1:8000/api/v1/dashboards/${encodeURIComponent(activeDashboardId)}/widget-monitor-map`);
+                window.activeMonitorMap = await mapRes.json();
+            } catch (e) {
+                console.error("Failed to sync monitor layout mappings:", e);
+            }
+        }
+
         async function selectDashboardFromSearch(templateId, category) {
             showLoadingSpinner(); 
+            renderCanvasSkeleton();
+            resetAIAnalysisPanel();
             const profile   = loadedDashboardProfilesMaster.find(d => d.id === templateId);
             const chosenName = profile ? profile.name : "Custom View";
-
             document.getElementById('dashboard-search-bar').value = chosenName;
             activeCategoryTag   = category;
             activeDashboardId   = templateId;
             activeDashboardName = chosenName;
             handleSearchFiltering(chosenName);
-
             document.getElementById('custom-dash-name').style.display      = 'none';
             document.getElementById('custom-dash-type-text').style.display  = 'none';
             document.getElementById('save-dash-btn').style.display          = 'block';
-
             document.getElementById('active-dashboard-display-name').innerText = `📊 ${chosenName}`;
             document.getElementById('workspace-active-title-bar').style.display = 'flex';
-
             try {
                 const token = localStorage.getItem("zoho_access_token");
                 const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboard-defaults?category=${category}&template_id=${encodeURIComponent(templateId)}&username=${encodeURIComponent(authenticatedUserToken)}`, {
-                    method: "GET", headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" }
+                    method: "GET", headers: { "Authorization": "Bearer " + token }
                 });
                 fetchedDefaultsBuffer = await res.json();
-
                 if (fetchedDefaultsBuffer && fetchedDefaultsBuffer.length > 0) {
-                    currentDashboardWidgets = fetchedDefaultsBuffer.map(item => ({ id: item.widget_id, name: item.name, renderType: 'bar' }));
+                    currentDashboardWidgets = fetchedDefaultsBuffer.map(item => ({
+                        id: item.widget_id,
+                        name: item.name,
+                        renderType: mapChartTypeToRenderType(item.chart_type),
+                        config: buildConfigFromDefaultsItem(item)
+                    }));
                     document.getElementById('bundle-banner').style.display = 'none';
                     renderCanvas();
-                    lastAnalysisResult = null;
-                    refreshAnalysisPanelState();
                 } else {
                     document.getElementById('bundle-banner-title').innerText = `Step 2: Mapped Core Suggestions for "${chosenName}"`;
-                    renderStep2BundleBanner();
+                    triggerStep2Fetch(activeCategoryTag, chosenName, templateId);
                 }
             } catch (err) {
                 triggerStep2Fetch(activeCategoryTag, chosenName, templateId);
-            } finally { hideLoadingSpinner(); }
+            } finally { 
+                hideLoadingSpinner(); 
+                await refreshActiveMonitorMap(); 
+                fetchRecommendedWidgets(); 
+            }
+        }
+
+        async function hideDashboardFromList(event, templateId) {
+            event.stopPropagation();
+            if (!confirm("Hide this live-synced dashboard from your list? Its captured data stays intact, and you can unhide it later from Recently Deleted.")) return;
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboards/hide/${templateId}`, { method: 'POST' });
+                if ((await res.json()).status === "success") {
+                    if (activeDashboardId === templateId) goToHomeWorkspace();
+                    await initStudio();
+                }
+            } catch (err) { alert(err); }
         }
 
         async function removeDashboardFromDatabase(event, templateId) {
             event.stopPropagation();
-            if (!confirm("Are you sure you want to delete this active configuration profile dashboard?")) return;
+            if (!confirm("Are you sure you want to delete this active configuration dashboard?")) return;
             try {
                 const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboards/delete/${templateId}?username=${encodeURIComponent(authenticatedUserToken)}`, { method: 'DELETE' });
                 if (res.status === 200) {
-                    document.getElementById('dashboard-search-bar').value = '';
-                    currentDashboardWidgets = [];
-                    activeDashboardId = "";
-                    activeDashboardName = "";
-                    renderCanvas();
-                    document.getElementById('bundle-banner').style.display = 'none';
-                    document.getElementById('workspace-active-title-bar').style.display = 'none';
-                    document.getElementById('save-dash-btn').style.display = 'none';
-                    lastAnalysisResult = null;
-                    refreshAnalysisPanelState();
+                    goToHomeWorkspace();
                     await initStudio();
                 }
             } catch (err) { alert(err); }
@@ -448,15 +580,15 @@
             document.getElementById('custom-dash-name').style.display = 'none';
             document.getElementById('custom-dash-type-text').style.display = 'none';
             document.getElementById('save-dash-btn').style.display = 'none';
-
             currentDashboardWidgets = [];
             activeDashboardId   = "";
             activeDashboardName = "";
             activeCategoryTag   = "";
-            lastAnalysisResult  = null;
-
+            window.__draftTemplateId = null;
+            window.activeMonitorMap = {};
             renderCanvas();
-            refreshAnalysisPanelState();
+            fetchRecommendedWidgets();
+            resetAIAnalysisPanel();
             handleSearchFiltering('');
         }
 
@@ -471,10 +603,16 @@
             document.getElementById('save-dash-btn').style.display         = 'block';
             activeDashboardId   = "";
             activeDashboardName = "";
-            lastAnalysisResult = null;
-            refreshAnalysisPanelState();
-            handleSearchFiltering(document.getElementById('dashboard-search-bar').value);
-
+            // Reset here, not just on Type-field input -- otherwise a
+            // custom dashboard started right after viewing a Live
+            // dashboard inherits that dashboard's category tag (e.g.
+            // "Live Capture") if the user never fills in the Type field.
+            activeCategoryTag   = "";
+            window.__draftTemplateId = null;
+            window.activeMonitorMap = {};
+            fetchRecommendedWidgets();
+            resetAIAnalysisPanel();
+            handleSearchFiltering('');
             document.getElementById('custom-dash-name').oninput      = handleCustomDashboardFieldChange;
             document.getElementById('custom-dash-type-text').oninput = handleCustomDashboardFieldChange;
         }
@@ -487,41 +625,15 @@
                 if (typeText) {
                     activeCategoryTag = typeText.toLowerCase().replace(/[^a-z0-9]/g, '_') || "general";
                 }
-
                 if (!dashName) {
-                    document.getElementById('bundle-options-container').innerHTML = '<span style="font-size:12px; color:#94a3b8;">Type a dashboard name to get AI widget suggestions...</span>';
+                    document.getElementById('bundle-options-container').innerHTML = '<span style="font-size:12px; color:#94a3b8;">Type a dashboard name to load starter tracks...</span>';
                     document.getElementById('bundle-banner').style.display = 'flex';
                     return;
                 }
-
                 document.getElementById('active-dashboard-display-name').innerText = `🛠️ ${dashName}${activeCategoryTag ? ' (' + activeCategoryTag + ')' : ''}`;
                 document.getElementById('workspace-active-title-bar').style.display = 'flex';
-                fetchAISuggestedWidgets(dashName, activeCategoryTag || 'general', slugifyCustomDashboardName(dashName));
+                triggerStep2Fetch(activeCategoryTag || 'general', dashName, slugifyCustomDashboardName(dashName));
             }, 450);
-        }
-
-        async function fetchAISuggestedWidgets(dashName, category, templateId) {
-            document.getElementById('bundle-banner-title').innerText = `Step 2: AI-Suggested Widgets for "${dashName}"`;
-            document.getElementById('bundle-options-container').innerHTML = '<span style="font-size:12px; color:#94a3b8;">✨ Thinking of widgets for this dashboard...</span>';
-            document.getElementById('bundle-banner').style.display = 'flex';
-
-            try {
-                const res = await fetch('http://127.0.0.1:8000/api/v1/dashboards/suggest-widgets', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ dashboard_name: dashName, category })
-                });
-                const data = await res.json();
-
-                if (data.status === 'success' && data.widgets && data.widgets.length > 0) {
-                    fetchedDefaultsBuffer = data.widgets;
-                    renderStep2BundleBanner();
-                } else {
-                    // AI unavailable or nothing returned — fall back to the plain category lookup
-                    await triggerStep2Fetch(category, dashName, templateId);
-                }
-            } catch (err) {
-                await triggerStep2Fetch(category, dashName, templateId);
-            }
         }
 
         async function triggerStep2Fetch(category, dashboardDisplayName, templateId) {
@@ -535,14 +647,14 @@
             const banner = document.getElementById('bundle-banner');
             const container = document.getElementById('bundle-options-container');
             if (!fetchedDefaultsBuffer || fetchedDefaultsBuffer.length === 0) {
-                container.innerHTML = '<span style="font-size:12px; color:#94a3b8;">Type a dashboard name to load starter tracks...</span>';
+                container.innerHTML = '<span style="font-size:12px; color:#94a3b8;">No matching defaults found. Proceeding with clean layout canvas.</span>';
                 banner.style.display = 'flex';
                 return;
             }
             let html = '';
             fetchedDefaultsBuffer.forEach((item, index) => {
                 html += `
-                    <label class="checkbox-container" ${item.reason ? `title="${escAttr(item.reason)}"` : ''}>
+                    <label class="checkbox-container">
                         <input type="checkbox" id="chk-def-${index}" value="${escAttr(item.widget_id)}" data-name="${escAttr(item.name)}" checked>
                         <span>${escHTML(item.name)}</span>
                     </label>`;
@@ -556,34 +668,22 @@
             currentDashboardWidgets = [];
             fetchedDefaultsBuffer.forEach((item, index) => {
                 const chk = document.getElementById(`chk-def-${index}`);
-                if (chk && chk.checked) { currentDashboardWidgets.push({ id: item.widget_id, name: item.name, renderType: 'bar' }); }
+                if (chk && chk.checked) {
+                    currentDashboardWidgets.push({
+                        id: item.widget_id,
+                        name: item.name,
+                        renderType: mapChartTypeToRenderType(item.chart_type),
+                        config: buildConfigFromDefaultsItem(item)
+                    });
+                }
             });
             document.getElementById('bundle-banner').style.display = 'none';
             renderCanvas();
-            lastAnalysisResult = null;
-            refreshAnalysisPanelState();
-        }
-
-        function promptAndInjectCustomWidget() {
-            const customName = prompt("Enter a unique title for your custom metric widget:");
-            if (!customName || !customName.trim()) return;
-            if (!activeCategoryTag) activeCategoryTag = "general";
-            currentDashboardWidgets.push({ id: "manual_widget_" + Date.now(), name: customName.trim(), renderType: 'bar' });
-            renderCanvas();
-            refreshAnalysisPanelState();
-        }
-
-        function addWidget(id, name) {
-            if (currentDashboardWidgets.some(w => w.id === id)) return;
-            currentDashboardWidgets.push({ id, name, renderType: 'bar' });
-            renderCanvas();
-            refreshAnalysisPanelState();
         }
 
         function removeWidget(index) {
             currentDashboardWidgets.splice(index, 1);
             renderCanvas();
-            refreshAnalysisPanelState();
         }
 
         function toggleWidgetVisualType(index, selectedType) {
@@ -597,29 +697,23 @@
             const card = document.getElementById('canvas-grid').querySelectorAll('.widget-card')[index];
             const heading = card.querySelector('.editable-widget-heading');
             const currentName = currentDashboardWidgets[index].name;
-
             const input = document.createElement('input');
             input.type = 'text'; input.value = currentName; input.className = 'widget-rename-input';
             heading.replaceWith(input); input.focus(); input.select();
-
             let committed = false;
             function commitRename(save) {
                 if (committed) return; committed = true;
                 const clean = save ? input.value.trim() : '';
                 const newHeading = document.createElement('h4');
                 newHeading.className  = 'editable-widget-heading';
-                newHeading.ondblclick = () => triggerInlineWidgetRename(index);
-
                 if (!clean) { newHeading.textContent = currentName; input.replaceWith(newHeading); return; }
                 currentDashboardWidgets[index].name = clean;
                 newHeading.textContent = clean; input.replaceWith(newHeading);
-
                 fetch('http://127.0.0.1:8000/api/v1/widgets/update', {
                     method: 'PUT', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ widget_id: currentDashboardWidgets[index].id, widget_name: clean })
-                }).then(() => refreshAnalysisPanelState());
+                });
             }
-
             input.addEventListener('keydown', (e) => { if (e.key === 'Enter') commitRename(true); if (e.key === 'Escape') commitRename(false); });
             input.addEventListener('blur', () => commitRename(true));
         }
@@ -630,27 +724,75 @@
             return Math.abs((hash + offset * 73) % 85) + 12;
         }
 
-        // ─── HIGH LEVEL REAL-TIME TELEMETRY ENGINE LOOP HOOKS ───
+        // No real per-point time series is captured anywhere yet (the sync
+        // script only reports a widget's current snapshot value, not its
+        // history), so recommendation previews use the same seeded-mock
+        // approach the canvas placeholders already use elsewhere -- same
+        // name always produces the same-looking "live" wiggle, it's just
+        // not sourced from a real observed series.
+        function generateMockLiveSeries(nameString, count) {
+            const points = [];
+            for (let i = 0; i < count; i++) points.push([i, generateDeterministicValue(nameString || 'widget', i)]);
+            return points;
+        }
+
+        // Each chart type now maps to its OWN distinct visual style --
+        // Line stays a line, Area stays filled, Horizontal Bar lays out
+        // sideways, Vertical Bar/Pie/Numeric keep their existing look.
+        // Previously everything collapsed into just bar/pie/kpi.
+        function mapChartTypeToRenderType(chartType) {
+            switch (chartType) {
+                case 'PieChart': return 'pie';
+                case 'Numeric': return 'kpi';
+                case 'TimeChart': return 'line';
+                case 'AreaChart': return 'area';
+                case 'HorizontalBar': return 'horizontal-bar';
+                case 'VerticalBar': return 'bar';
+                default: return 'bar';
+            }
+        }
+
+        // Builds the same {resourceType, showOption, timePeriod} shape the
+        // Add Widget flow produces, from a /api/v1/dashboard-defaults row,
+        // so the config line under a widget's name survives a reload.
+        function buildConfigFromDefaultsItem(item) {
+            if (!item || (!item.resource_type && !item.show_option && !item.time_period)) return null;
+            return { resourceType: item.resource_type, showOption: item.show_option, timePeriod: item.time_period };
+        }
+
         async function populateRealWidgetGraphs() {
+            if (!activeDashboardId || !window.activeMonitorMap) return;
             const token = localStorage.getItem("zoho_access_token");
             const cards = document.querySelectorAll('.widget-card');
-
             cards.forEach(async (card) => {
                 const widgetId = card.id.replace('card-', '');
                 const renderType = card.getAttribute('data-render-type');
-
+                const mapping = window.activeMonitorMap[widgetId];
+                if (!mapping || !mapping.monitor_id) return;
                 try {
-                    const res = await fetch(`http://127.0.0.1:8000/api/v1/widget-graph-data?monitor_id=${encodeURIComponent(activeDashboardId)}&metric_key=${encodeURIComponent(widgetId)}`, {
+                    const res = await fetch(`http://127.0.0.1:8000/api/v1/widget-graph-data?monitor_id=${encodeURIComponent(mapping.monitor_id)}&metric_key=${encodeURIComponent(mapping.metric_key)}`, {
                         headers: { "Authorization": "Bearer " + token }
                     });
                     const data = await res.json();
                     if (data && data.points) {
                         const points = data.points;
                         const latest = points[points.length - 1];
-
                         if (renderType === 'bar') {
                             const bars = card.querySelectorAll('.chart-bar');
-                            bars.forEach((bar, idx) => { if(points[idx]) bar.style.height = `${points[idx]}%`; });
+                            bars.forEach((bar, idx) => { if(points[idx] !== undefined) bar.style.height = `${points[idx]}%`; });
+                            const displaySpan = card.querySelector('.real-metric-numeric-label');
+                            if (displaySpan) displaySpan.innerText = latest;
+                        } else if (renderType === 'horizontal-bar') {
+                            const bars = card.querySelectorAll('.chart-bar-h');
+                            bars.forEach((bar, idx) => { if(points[idx] !== undefined) bar.style.width = `${points[idx]}%`; });
+                            const displaySpan = card.querySelector('.real-metric-numeric-label');
+                            if (displaySpan) displaySpan.innerText = latest;
+                        } else if (renderType === 'line' || renderType === 'area') {
+                            const host = card.querySelector('.sparkline-host');
+                            if (host) {
+                                const framed = points.map((v, idx) => [idx, v]);
+                                host.innerHTML = (renderType === 'area' ? buildAreaChartSVG(framed, 200, 60) : buildLineChartSVG(framed, 200, 60)) || '';
+                            }
                             const displaySpan = card.querySelector('.real-metric-numeric-label');
                             if (displaySpan) displaySpan.innerText = latest;
                         } else if (renderType === 'kpi') {
@@ -663,7 +805,55 @@
                             if (pieText) pieText.innerText = `${latest}%`;
                         }
                     }
-                } catch (e) { console.error("Telemetry channel error:", e); }
+                } catch (e) { console.error("Telemetry failure on live grid snapshot:", e); }
+            });
+        }
+
+        function buildLineChartSVG(points, width, height) {
+            if (!points || points.length < 2) return null;
+            const values = points.map((p) => p[1]);
+            const min = Math.min(...values), max = Math.max(...values);
+            const range = (max - min) || 1;
+            const stepX = width / (points.length - 1);
+            const coords = values.map((v, i) => `${(i * stepX).toFixed(1)},${(height - ((v - min) / range) * height).toFixed(1)}`).join(' ');
+            return `<svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" preserveAspectRatio="none">
+                <polyline points="${coords}" fill="none" stroke="#2066e4" stroke-width="2"/>
+            </svg>`;
+        }
+
+        function buildAreaChartSVG(points, width, height) {
+            if (!points || points.length < 2) return null;
+            const values = points.map((p) => p[1]);
+            const min = Math.min(...values), max = Math.max(...values);
+            const range = (max - min) || 1;
+            const stepX = width / (points.length - 1);
+            const lineCoords = values.map((v, i) => `${(i * stepX).toFixed(1)},${(height - ((v - min) / range) * height).toFixed(1)}`);
+            const fillCoords = [`0,${height}`, ...lineCoords, `${width},${height}`].join(' ');
+            return `<svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" preserveAspectRatio="none">
+                <polygon points="${fillCoords}" fill="#2066e4" fill-opacity="0.18" stroke="none"/>
+                <polyline points="${lineCoords.join(' ')}" fill="none" stroke="#2066e4" stroke-width="2"/>
+            </svg>`;
+        }
+
+        async function renderRealLineCharts() {
+            let chartMap = {};
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboards/${encodeURIComponent(activeDashboardId)}/live-chart-data`);
+                chartMap = await res.json();
+            } catch (e) { console.error("Could not load real chart data:", e); return; }
+            document.querySelectorAll('.widget-card').forEach((card) => {
+                const widgetId = card.id.replace('card-', '');
+                const renderType = card.getAttribute('data-render-type');
+                if (renderType !== 'line' && renderType !== 'area') return; // don't override bar/pie/kpi with a line
+                const entry = chartMap[widgetId];
+                if (!entry || !entry.chart_data || entry.chart_data.length < 2) return;
+                const points = [...entry.chart_data].reverse();
+                const svg = renderType === 'area' ? buildAreaChartSVG(points, 260, 70) : buildLineChartSVG(points, 260, 70);
+                if (!svg) return;
+                const chartBox = card.querySelector('.chart-mock-box');
+                if (chartBox) chartBox.innerHTML = svg + `<div style="text-align:center;font-weight:700;color:#2066e4;font-size:13px;">${points[points.length - 1][1]}</div>`;
+                const feedLabel = card.querySelector('.feed-label-text');
+                if (feedLabel) feedLabel.innerText = 'Live from Site24x7';
             });
         }
 
@@ -674,180 +864,120 @@
                 grid.innerHTML = '<div class="empty-hint"><h3>Dashboard Canvas clear. Add elements to begin.</h3></div>';
                 return;
             }
-
             currentDashboardWidgets.forEach((w, index) => {
                 const coreVal = generateDeterministicValue(w.name, 0);
                 let innerChartHTML = '';
                 let unit = '%';
-                
                 if (w.name && typeof w.name === 'string') {
                     const lowerName = w.name.toLowerCase();
-                    if (lowerName.includes('rate') || lowerName.includes('volume')) unit = 'req/s';
+                    if (lowerName.includes('rate')) unit = 'req/s';
                     else if (lowerName.includes('ms') || lowerName.includes('latency')) unit = 'ms';
                 }
-
                 if (w.renderType === 'pie') {
                     innerChartHTML = `
-                        <div style="font-size: 13px; font-weight: bold; color: #6b7999; text-transform: uppercase;">Allocation:</div>
                         <div class="pie-chart-circle" style="background: conic-gradient(#2066e4 0% ${coreVal}%, #dde3eb ${coreVal}% 100%);"></div>
                         <div style="font-size:13px; font-weight:800; color:#2066e4;" class="pie-text-display">${coreVal}%</div>`;
                 } else if (w.renderType === 'kpi') {
                     innerChartHTML = `
                         <div style="display:flex; flex-direction:column; justify-content: center; height:100%;">
-                            <span style="font-size:11px; color:#475569; font-weight:bold; text-transform:uppercase;">Current Value</span>
                             <div class="kpi-value-text"><span class="kpi-value-text-display">${coreVal}</span><span class="kpi-unit">${unit}</span></div>
+                        </div>`;
+                } else if (w.renderType === 'line' || w.renderType === 'area') {
+                    const framedPoints = [0, 1, 2].map((i) => [i, generateDeterministicValue(w.name, i)]).concat([[3, coreVal]]);
+                    const svg = w.renderType === 'area' ? buildAreaChartSVG(framedPoints, 200, 60) : buildLineChartSVG(framedPoints, 200, 60);
+                    innerChartHTML = `
+                        <div class="sparkline-host" style="flex:1;">${svg || ''}</div>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            <span style="font-size:16px; font-weight:800; color:#2066e4;"><span class="real-metric-numeric-label">${coreVal}</span><span style="font-size:10px;">${unit}</span></span>
+                        </div>`;
+                } else if (w.renderType === 'horizontal-bar') {
+                    innerChartHTML = `
+                        <div class="simplified-bar-container-h" style="display:flex; flex-direction:column; justify-content:center; gap:5px; flex:1;">
+                            <div style="height:6px; border-radius:3px; background:#2066e4; opacity:0.4; width:${generateDeterministicValue(w.name, 1)}%;" class="chart-bar-h"></div>
+                            <div style="height:6px; border-radius:3px; background:#2066e4; opacity:0.6; width:${generateDeterministicValue(w.name, 2)}%;" class="chart-bar-h"></div>
+                            <div style="height:6px; border-radius:3px; background:#2066e4; width:${coreVal}%;" class="chart-bar-h"></div>
                         </div>
-                        <div style="font-size: 11px; padding: 4px 8px; background: #10b9811c; color: #10b981; border-radius:4px; font-weight:bold;">● Live Stream</div>`;
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            <span style="font-size:16px; font-weight:800; color:#2066e4;"><span class="real-metric-numeric-label">${coreVal}</span><span style="font-size:10px;">${unit}</span></span>
+                        </div>`;
                 } else {
                     innerChartHTML = `
                         <div class="simplified-bar-container">
                             <div class="chart-bar" style="height: ${generateDeterministicValue(w.name, 1)}%; opacity: 0.4;"></div>
                             <div class="chart-bar" style="height: ${generateDeterministicValue(w.name, 2)}%; opacity: 0.6;"></div>
-                            <div class="chart-bar" style="height: ${generateDeterministicValue(w.name, 3)}%; opacity: 0.8;"></div>
                             <div class="chart-bar" style="height: ${coreVal}%;"></div>
                         </div>
-                        <div style="display:flex; flex-direction:column; justify-content:center; align-items:flex-end; min-width:65px;">
-                            <span style="font-size:10px; color:#475569; font-weight:bold; text-transform:uppercase;">Latest</span>
-                            <span style="font-size:18px; font-weight:800; color:#2066e4;"><span class="real-metric-numeric-label">${coreVal}</span><span style="font-size:10px; color:#475569;">${unit}</span></span>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            <span style="font-size:16px; font-weight:800; color:#2066e4;"><span class="real-metric-numeric-label">${coreVal}</span><span style="font-size:10px;">${unit}</span></span>
                         </div>`;
                 }
-
                 const card = document.createElement('div');
                 card.className = 'widget-card'; card.id = `card-${w.id}`;
                 card.setAttribute('data-render-type', w.renderType);
-
+                card.draggable = true;
+                card.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', String(index));
+                    card.classList.add('dragging');
+                });
+                card.addEventListener('dragend', () => card.classList.remove('dragging'));
+                card.addEventListener('dragover', (e) => { e.preventDefault(); card.classList.add('drag-over'); });
+                card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+                card.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    card.classList.remove('drag-over');
+                    const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+                    handleWidgetReorder(fromIndex, index);
+                });
+                const dragHandle = document.createElement('span');
+                dragHandle.className = 'drag-handle'; dragHandle.innerText = '⠿'; dragHandle.title = 'Drag to reorder';
+                card.appendChild(dragHandle);
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'close-btn'; deleteBtn.innerText = '✕';
                 deleteBtn.addEventListener('click', () => removeWidget(index));
                 card.appendChild(deleteBtn);
-
                 const headerWrapper = document.createElement('div');
-                headerWrapper.innerHTML = `<span style="font-size:9px; color:#2066e4; font-weight:700; text-transform:uppercase;">Active Telemetry Feed</span>`;
+                headerWrapper.style.marginLeft = '16px';
+                headerWrapper.innerHTML = `<span class="feed-label-text" style="font-size:9px; color:#2066e4; font-weight:700;">Active Telemetry Feed</span>`;
                 const titleHeading = document.createElement('h4');
                 titleHeading.className = 'editable-widget-heading'; titleHeading.innerText = w.name;
                 titleHeading.addEventListener('dblclick', () => triggerInlineWidgetRename(index));
-                
-                headerWrapper.appendChild(titleHeading); card.appendChild(headerWrapper);
-
+                headerWrapper.appendChild(titleHeading);
+                if (w.config) {
+                    const configLine = document.createElement('div');
+                    const parts = [w.config.resourceType, w.config.showOption, w.config.timePeriod].filter(Boolean);
+                    configLine.style.cssText = 'font-size:9px; color:#94a3b8; margin-top:2px;';
+                    configLine.innerText = (w.config.linkedMonitor ? `🔗 ${w.config.linkedMonitor} · ` : '') + parts.join(' · ');
+                    headerWrapper.appendChild(configLine);
+                }
+                card.appendChild(headerWrapper);
                 const chartBox = document.createElement('div');
                 chartBox.className = 'chart-mock-box'; chartBox.innerHTML = innerChartHTML;
                 card.appendChild(chartBox);
-
                 const controlsWrapper = document.createElement('div');
                 controlsWrapper.className = 'widget-controls';
                 controlsWrapper.innerHTML = `<span>intervals: 1m logs</span>`;
-
                 const typeSelect = document.createElement('select');
                 typeSelect.className = 'type-select-mini';
                 typeSelect.innerHTML = `
-                    <option value="bar" ${w.renderType === 'bar' ? 'selected' : ''}>View: Bar Graph</option>
-                    <option value="pie" ${w.renderType === 'pie' ? 'selected' : ''}>View: Pie Chart</option>
-                    <option value="kpi" ${w.renderType === 'kpi' ? 'selected' : ''}>View: KPI Summary</option>`;
+                    <option value="bar" ${w.renderType === 'bar' ? 'selected' : ''}>View: Bar</option>
+                    <option value="horizontal-bar" ${w.renderType === 'horizontal-bar' ? 'selected' : ''}>View: Horizontal Bar</option>
+                    <option value="line" ${w.renderType === 'line' ? 'selected' : ''}>View: Line</option>
+                    <option value="area" ${w.renderType === 'area' ? 'selected' : ''}>View: Area</option>
+                    <option value="pie" ${w.renderType === 'pie' ? 'selected' : ''}>View: Pie</option>
+                    <option value="kpi" ${w.renderType === 'kpi' ? 'selected' : ''}>View: KPI</option>`;
                 typeSelect.onchange = (e) => toggleWidgetVisualType(index, e.target.value);
-                
                 controlsWrapper.appendChild(typeSelect); card.appendChild(controlsWrapper);
                 grid.appendChild(card);
             });
-
-            // Initial populating tick
             populateRealWidgetGraphs();
-        }
-
-        async function analyzeDashboard() {
-            const panel = document.getElementById('ai-analysis-panel');
-
-            if (currentDashboardWidgets.length === 0) {
-                panel.innerHTML = '<div class="locked-placeholder">Add at least one widget to this dashboard before running an analysis.</div>';
-                return;
-            }
-
-            const dashboardName = activeDashboardId ? activeDashboardName : (document.getElementById('custom-dash-name').value.trim() || "Custom Dashboard");
-            const btn = document.getElementById('analyze-dash-btn');
-
-            panel.innerHTML = `<div class="locked-placeholder">Analyzing "${escHTML(dashboardName)}"...</div>`;
-            btn.disabled = true;
-
-            try {
-                const widgetsPayload = currentDashboardWidgets.map(w => ({ id: w.id, name: w.name }));
-                const res = await fetch('http://127.0.0.1:8000/api/v1/dashboards/analyze', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ dashboard_name: dashboardName, category: activeCategoryTag || 'general', widgets: widgetsPayload })
-                });
-                const data = await res.json();
-
-                if (data.status !== 'success') {
-                    panel.innerHTML = `<div class="analyze-warning-row">⚠️ ${escHTML(data.message || 'Analysis failed.')}</div>`;
-                    return;
-                }
-                renderAnalysisResults(data.analysis);
-            } catch (err) {
-                panel.innerHTML = `<div class="analyze-warning-row">⚠️ Could not reach the analysis service: ${escHTML(String(err))}</div>`;
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
-        function refreshAnalysisPanelState() {
-            if (lastAnalysisResult) {
-                renderAnalysisResults(lastAnalysisResult);
-            } else {
-                document.getElementById('ai-analysis-panel').innerHTML = '<div class="locked-placeholder">Select or build a dashboard, then click Analyze for AI-powered insights on this dashboard\'s widgets.</div>';
-            }
-        }
-
-        function renderAnalysisResults(analysis) {
-            lastAnalysisResult = analysis;
-            const panel = document.getElementById('ai-analysis-panel');
-            let html = '';
-
-            html += `<div class="analyze-section-label">Overview</div>`;
-            html += `<div class="analyze-summary-text">${escHTML(analysis.summary || 'No summary available.')}</div>`;
-
-            html += `<div class="analyze-section-label">Suggested Additions</div>`;
-            if (analysis.gaps && analysis.gaps.length > 0) {
-                analysis.gaps.forEach(g => {
-                    const alreadyAdded = currentDashboardWidgets.some(w => w.name.trim().toLowerCase() === g.name.trim().toLowerCase());
-                    const genId = 'ai_suggested_' + g.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_') + '_' + Date.now();
-                    html += `
-                        <div class="analyze-gap-card">
-                            <h5>➕ ${escHTML(g.name)}</h5>
-                            <p>${escHTML(g.reason)}</p>
-                            <button class="btn-add-gap" ${alreadyAdded ? 'disabled' : ''} onclick="addWidget('${escAttr(genId)}', '${escAttr(g.name)}')">
-                                ${alreadyAdded ? '✓ Already on dashboard' : '+ Add Widget'}
-                            </button>
-                        </div>`;
-                });
-            } else {
-                html += `<div class="analyze-empty-note">No obvious gaps found — this dashboard looks well covered.</div>`;
-            }
-
-            html += `<div class="analyze-section-label">Redundancies</div>`;
-            if (analysis.redundancies && analysis.redundancies.length > 0) {
-                analysis.redundancies.forEach(r => {
-                    const names = (r.widgets || []).map(escHTML).join(' + ');
-                    html += `<div class="analyze-redundancy-card"><h5>⚠️ ${names}</h5><p>${escHTML(r.reason)}</p></div>`;
-                });
-            } else {
-                html += `<div class="analyze-empty-note">No redundant widgets detected.</div>`;
-            }
-
-            html += `<div class="analyze-section-label">Warnings</div>`;
-            if (analysis.warnings && analysis.warnings.length > 0) {
-                analysis.warnings.forEach(w => {
-                    html += `<div class="analyze-warning-row">🚩 ${escHTML(w)}</div>`;
-                });
-            } else {
-                html += `<div class="analyze-empty-note">No critical warnings.</div>`;
-            }
-
-            panel.innerHTML = html;
+            renderRealLineCharts();
         }
 
         async function commitDashboardToDatabase() {
             let name = activeDashboardId ? activeDashboardName : document.getElementById('custom-dash-name').value.trim();
-            let generatedId = activeDashboardId ? activeDashboardId : slugifyCustomDashboardName(name);
+            let generatedId = activeDashboardId ? activeDashboardId : (window.__draftTemplateId || slugifyCustomDashboardName(name));
             if (!name || currentDashboardWidgets.length === 0) return;
-
             const widgetsPayload = currentDashboardWidgets.map(w => ({ id: w.id, name: w.name }));
             try {
                 const res = await fetch('http://127.0.0.1:8000/api/v1/dashboards/save', {
@@ -856,6 +986,7 @@
                 });
                 if(res.ok) {
                     alert(`Configurations persistent under profile context.`);
+                    window.__draftTemplateId = null;
                     activeDashboardId = generatedId; activeDashboardName = name;
                     await initStudio();
                     document.getElementById('dashboard-search-bar').value = name;
@@ -867,7 +998,262 @@
             } catch (err) { alert(err); }
         }
 
-        window.onload = checkActiveSessionState;
+        function getWorkingTemplateId() {
+            if (activeDashboardId) return activeDashboardId;
+            const name = document.getElementById('custom-dash-name').value.trim();
+            if (!name) return window.__draftTemplateId || null;
+            window.__draftTemplateId = slugifyCustomDashboardName(name);
+            return window.__draftTemplateId;
+        }
+
+        async function openAddWidgetModal() {
+            const tid = getWorkingTemplateId();
+            if (!tid) { alert('Name your dashboard or select one before adding widgets.'); return; }
+            document.getElementById('aw-modal-backdrop').classList.add('active');
+            document.getElementById('aw-modal-title').innerText = 'Add Widget Selection Pipeline';
+            const realEngineInstance = new WidgetRecommendationEngine();
+            window.widgetUI = new WidgetRecommendationUI(realEngineInstance, 'aw-modal-body', {
+                templateId: tid,
+                username: authenticatedUserToken || 'admin'
+            });
+            window.widgetUI.init();
+            window.onWidgetAdded = async function(widgetId, name, configSummary) {
+                const graphStyle = mapChartTypeToRenderType(configSummary && configSummary.chartType);
+                currentDashboardWidgets.push({ id: widgetId, name, renderType: graphStyle, config: configSummary || null });
+                renderCanvas();
+                await refreshActiveMonitorMap();
+                fetchRecommendedWidgets();
+                closeAddWidgetModal();
+            };
+        }
+
+        function closeAddWidgetModal() {
+            document.getElementById('aw-modal-backdrop').classList.remove('active');
+            if (window.widgetUI) {
+                window.widgetUI.pendingWidget = null;
+                window.widgetUI.pendingConfig = null;
+            }
+        }
+
+        async function fetchRecommendedWidgets() {
+            const panel = document.getElementById('recommendations-panel');
+            const tid = getWorkingTemplateId();
+            if (!tid) { panel.innerHTML = '<div class="locked-placeholder">Add a widget to this dashboard to see live recommendations.</div>'; return; }
+            renderRecommendationsSkeleton();
+            const token = localStorage.getItem('zoho_access_token');
+            try {
+                const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+                const res = await fetch(`http://127.0.0.1:8000/api/v1/recommendations?template_id=${encodeURIComponent(tid)}`, { headers });
+                const data = await res.json();
+                const groups = data.recommendations_by_category || [];
+                const hasAny = groups.some(g => g.recommendations && g.recommendations.length > 0);
+                if (!hasAny) {
+                    panel.innerHTML = '<div class="locked-placeholder">No further recommendations right now.</div>';
+                    return;
+                }
+                // Cache chart_data per widget_id so addRecommendedMetric can
+                // pass the real snapshot along when the widget is added,
+                // without stuffing a whole time-series array into an
+                // onclick attribute string.
+                window.__recChartCache = {};
+                window.__recChartTypeCache = {};
+                let html = '';
+                groups.forEach(group => {
+                    if (!group.recommendations || group.recommendations.length === 0) return;
+                    html += `<div class="rec-category-group">
+                        <div class="rec-category-heading" style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--muted); margin:14px 0 8px;">${escHTML(group.category)}</div>`;
+                    group.recommendations.forEach(rec => {
+                        window.__recChartCache[rec.widget_id] = rec.chart_data && rec.chart_data.length > 1
+                            ? rec.chart_data
+                            : generateMockLiveSeries(rec.name, 10);
+                        window.__recChartTypeCache[rec.widget_id] = rec.matched_chart_type || null;
+                        const metaParts = [rec.resource_type, rec.show_option, rec.time_period].filter(Boolean);
+                        const metaLine = metaParts.length
+                            ? `<div style="font-size:9px; color:#94a3b8; margin:2px 0 6px;">${escHTML(metaParts.join(' · '))}</div>`
+                            : `<div style="font-size:9px; color:#94a3b8; margin:2px 0 6px;">No usage data yet</div>`;
+                        html += `
+                            <div class="amazon-rec-card">
+                                <h5 style="font-size:12px; font-weight:700;">${escHTML(rec.name)}</h5>
+                                ${metaLine}
+                                <p style="font-size:11px; color:var(--muted); line-height:1.4;">${escHTML(rec.reason || '')}</p>
+                                <button class="btn-add-rec" onclick="addRecommendedMetric('${escAttr(rec.widget_id)}', '${escAttr(rec.name)}')">+ Add Widget</button>
+                            </div>`;
+                    });
+                    html += `</div>`;
+                });
+                panel.innerHTML = html;
+            } catch (err) { panel.innerHTML = '<div class="locked-placeholder">Could not load recommendations.</div>'; }
+        }
+
+        async function addRecommendedMetric(id, name) {
+            const tid = getWorkingTemplateId();
+            if (!tid) return;
+            let monitorId = null;
+            if (id.startsWith('widget_')) { monitorId = id.split('_')[1]; }
+            const cachedChartData = (window.__recChartCache && window.__recChartCache[id]) || null;
+            const cachedChartType = (window.__recChartTypeCache && window.__recChartTypeCache[id]) || null;
+            const payload = {
+                category: activeCategoryTag || 'Performance Attributes',
+                chart_type: cachedChartType || 'TimeChart', // real captured shape when we have one, else render the mock series as a line
+                resource_type: 'Monitor',
+                monitor_ids: monitorId ? [monitorId] : [], monitor_type: 'Monitor',
+                metric_ids: [{ id, name }], show_option: 'Latest 50 Active Monitors', time_period: 'Last Hour',
+                display_name: name, username: authenticatedUserToken || 'admin',
+                chart_data: cachedChartData
+            };
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboards/${encodeURIComponent(tid)}/widgets/add`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.status !== 'success') { alert(data.message || 'Could not add widget.'); return; }
+                currentDashboardWidgets.push({
+                    id: data.widget_id,
+                    name,
+                    renderType: mapChartTypeToRenderType(payload.chart_type),
+                    config: { resourceType: payload.resource_type, showOption: payload.show_option, timePeriod: payload.time_period }
+                });
+                renderCanvas();
+                await refreshActiveMonitorMap();
+                fetchRecommendedWidgets();
+            } catch (err) { alert(err); }
+        }
+
+        function slugifyGapName(name) {
+            return String(name).trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'widget';
+        }
+
+        function resetAIAnalysisPanel() {
+            const panel = document.getElementById('ai-analysis-panel');
+            if (!panel) return;
+            aiAnalysisAddedGaps = new Set();
+            panel.innerHTML = `
+                <div class="locked-placeholder">Add widgets to this dashboard, then run an analysis for a summary, gap suggestions, and redundancy warnings.</div>
+                <button class="ai-analyze-btn" id="ai-analyze-btn" onclick="analyzeDashboardWithAI()">✨ Analyze Dashboard</button>`;
+        }
+
+        function openAIAnalysisModal() {
+            document.getElementById('ai-modal-backdrop').classList.add('active');
+        }
+
+        function closeAIAnalysisModal() {
+            document.getElementById('ai-modal-backdrop').classList.remove('active');
+        }
+
+        async function analyzeDashboardWithAI() {
+            const panel = document.getElementById('ai-analysis-panel');
+            if (currentDashboardWidgets.length === 0) {
+                panel.innerHTML = `
+                    <div class="locked-placeholder">Add at least one widget before running an analysis.</div>
+                    <button class="ai-analyze-btn" onclick="analyzeDashboardWithAI()">✨ Analyze Dashboard</button>`;
+                return;
+            }
+            const btn = document.getElementById('ai-analyze-btn');
+            if (btn) { btn.disabled = true; btn.innerText = '✨ Analyzing…'; }
+            panel.innerHTML = `
+                <div class="skeleton-rec-card">
+                    <div class="skeleton-line skeleton-shimmer-bg" style="width:90%;"></div>
+                    <div class="skeleton-line skeleton-shimmer-bg" style="width:70%;"></div>
+                    <div class="skeleton-line skeleton-shimmer-bg" style="width:80%;"></div>
+                </div>`;
+            const payload = {
+                dashboard_name: activeDashboardName || document.getElementById('custom-dash-name').value.trim() || 'Untitled Dashboard',
+                category: activeCategoryTag || 'general',
+                widgets: currentDashboardWidgets.map(w => ({ id: w.id, name: w.name }))
+            };
+            try {
+                const res = await fetch('http://127.0.0.1:8000/api/v1/dashboards/analyze', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.status !== 'success') {
+                    panel.innerHTML = `
+                        <div class="locked-placeholder">${escHTML(data.message || 'AI analysis failed.')}</div>
+                        <button class="ai-analyze-btn" onclick="analyzeDashboardWithAI()">✨ Try Again</button>`;
+                    return;
+                }
+                renderAIAnalysisResults(data.analysis, data.catalog_grounded);
+            } catch (err) {
+                panel.innerHTML = `
+                    <div class="locked-placeholder">Could not reach the analysis service.</div>
+                    <button class="ai-analyze-btn" onclick="analyzeDashboardWithAI()">✨ Try Again</button>`;
+            }
+        }
+
+        function renderAIAnalysisResults(analysis, catalogGrounded) {
+            const panel = document.getElementById('ai-analysis-panel');
+            let html = '';
+            if (analysis.summary) {
+                html += `<div class="ai-summary-box">${escHTML(analysis.summary)}</div>`;
+            }
+            if (!catalogGrounded) {
+                html += `<div class="ai-warning-line">No captured widget catalog data yet to ground this against — gap suggestions below are general knowledge, not confirmed-available widget types.</div>`;
+            }
+            if (analysis.gaps && analysis.gaps.length > 0) {
+                html += `<div class="ai-section-title">Gap Suggestions</div>`;
+                analysis.gaps.forEach(gap => {
+                    const gapName = gap.name || 'Suggested widget';
+                    const badge = gap.in_catalog
+                        ? `<span class="ai-gap-catalog-badge">✓ In catalog</span>`
+                        : `<span class="ai-gap-nocatalog-badge">Not in catalog</span>`;
+                    const alreadyAdded = aiAnalysisAddedGaps.has(gapName);
+                    const addBtn = alreadyAdded
+                        ? `<button class="btn-add-rec" disabled style="border-color:#18a058; color:#18a058; opacity:0.85; cursor:default;">✓ Added</button>`
+                        : `<button class="btn-add-rec" style="border-color:#7c3aed; color:#7c3aed;" onclick="addAISuggestedGap('${escAttr(gapName)}', this)">+ Add Widget</button>`;
+                    html += `
+                        <div class="ai-gap-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                                <h5 style="font-size:12px; font-weight:700;">${escHTML(gapName)}</h5>
+                                ${badge}
+                            </div>
+                            <p style="font-size:11px; color:var(--muted); line-height:1.4;">${escHTML(gap.reason || '')}</p>
+                            ${gap.in_catalog ? addBtn : ''}
+                        </div>`;
+                });
+            }
+            if (analysis.redundancies && analysis.redundancies.length > 0) {
+                html += `<div class="ai-section-title">Redundancies</div>`;
+                analysis.redundancies.forEach(r => {
+                    html += `
+                        <div class="ai-redundancy-card">
+                            <h5 style="font-size:12px; font-weight:700;">${escHTML((r.widgets || []).join(' + '))}</h5>
+                            <p style="font-size:11px; color:var(--muted); line-height:1.4;">${escHTML(r.reason || '')}</p>
+                        </div>`;
+                });
+            }
+            if (analysis.warnings && analysis.warnings.length > 0) {
+                html += `<div class="ai-section-title">Warnings</div>`;
+                analysis.warnings.forEach(w => { html += `<div class="ai-warning-line">${escHTML(w)}</div>`; });
+            }
+            html += `<button class="ai-analyze-btn" style="margin-top:10px;" onclick="analyzeDashboardWithAI()">🔄 Re-analyze</button>`;
+            panel.innerHTML = html;
+        }
+
+        // AI-suggested gaps are only ever ones flagged in_catalog (matched
+        // against the real widget_catalog table server-side), so this is a
+        // confirmed-addable widget type -- added client-side the same way
+        // recommendation cards are, and it'll persist once the dashboard
+        // is saved via commitDashboardToDatabase like any other widget.
+        function addAISuggestedGap(name, btnEl) {
+            if (!name) return;
+            const tid = getWorkingTemplateId();
+            if (!tid) return;
+            const widgetId = `ai_gap_${slugifyGapName(name)}_${Date.now()}`;
+            currentDashboardWidgets.push({ id: widgetId, name, renderType: 'bar', config: null });
+            aiAnalysisAddedGaps.add(name);
+            if (btnEl) {
+                btnEl.disabled = true;
+                btnEl.innerText = '✓ Added';
+                btnEl.style.borderColor = '#18a058';
+                btnEl.style.color = '#18a058';
+                btnEl.style.opacity = '0.85';
+                btnEl.style.cursor = 'default';
+            }
+            renderCanvas();
+            fetchRecommendedWidgets();
+        }
+
+        window.onload = function() { initColorTheme(); checkActiveSessionState(); };
     </script>
 </body>
 </html>
