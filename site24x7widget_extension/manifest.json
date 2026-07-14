@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Site24x7 Dashboard Widget Sync",
+  "version": "1.0",
+  "description": "Reads widgets on a Site24x7 dashboard you are viewing and sends them to your local app.",
+  "permissions": [],
+  "host_permissions": [
+    "*://*.site24x7.com/*",
+    "http://localhost:8000/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://*.site24x7.com/*"],
+      "js": ["content.js", "dashboard-widget-sync.js", "dashboard-delete-sync.js"],
+      "all_frames": true,
+      "run_at": "document_idle"
+    }
+  ]
+}
