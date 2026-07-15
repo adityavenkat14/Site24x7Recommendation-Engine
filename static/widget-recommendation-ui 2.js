@@ -96,7 +96,7 @@ class WidgetRecommendationUI {
         const parts = [];
         if (s.resource_type.value) parts.push(`${s.resource_type.value} scope`);
         if (s.time_period.value) parts.push(s.time_period.value);
-        hintEl.innerHTML = `<p style="font-size:12px; color:#7f8c8d; margin:-8px 0 12px;">💡 Widgets like these are commonly set up with ${parts.join(", ")} (based on ${data.sample_size} real observation${data.sample_size === 1 ? "" : "s"}) — you'll be able to fine-tune this per widget.</p>`;
+        hintEl.innerHTML = `<p style="font-size:12px; color:var(--muted); margin:-8px 0 12px;">💡 Widgets like these are commonly set up with ${parts.join(", ")} (based on ${data.sample_size} real observation${data.sample_size === 1 ? "" : "s"}) — you'll be able to fine-tune this per widget.</p>`;
       }
     } catch (e) { /* non-critical, ignore */ }
   }
@@ -189,7 +189,7 @@ class WidgetRecommendationUI {
 
     const optionsSelect = (id, options, current, onchange) => `
       <select id="${id}" class="cfg-select" ${onchange ? `onchange="${onchange}"` : ""}
-        style="width:100%; padding:8px; border:1px solid #e0e6ed; border-radius:6px; font-size:13px;">
+        style="width:100%; padding:8px; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:6px; font-size:13px;">
         ${options.map((o) => `<option value="${o}" ${o === current ? "selected" : ""}>${o}</option>`).join("")}
       </select>`;
 
@@ -198,13 +198,13 @@ class WidgetRecommendationUI {
     let monitorSectionHTML = "";
     if (!localStorage.getItem("zoho_access_token")) {
       monitorSectionHTML = `
-        <div style="margin-bottom:16px; padding:12px; background:#fff8e1; border-radius:6px; font-size:12px; color:#7c6a1f;">
+        <div style="margin-bottom:16px; padding:12px; background:var(--primary-light); border:1px solid var(--warn); border-radius:6px; font-size:12px; color:var(--text);">
           Not connected to your Site24x7 account — this widget will be added as a placeholder without live data.
           <button class="resource-tab" style="margin-top:8px;" onclick="executeSessionAuthentication()">Connect Account</button>
         </div>`;
     } else if (this.monitors.length === 0) {
       monitorSectionHTML = `
-        <div style="margin-bottom:16px; padding:12px; background:#fff8e1; border-radius:6px; font-size:12px; color:#7c6a1f;">
+        <div style="margin-bottom:16px; padding:12px; background:var(--primary-light); border:1px solid var(--warn); border-radius:6px; font-size:12px; color:var(--text);">
           No monitors found on your account — this widget will be added as a placeholder without live data.
         </div>`;
     } else {
@@ -215,14 +215,14 @@ class WidgetRecommendationUI {
 
       monitorSectionHTML = `
         <div style="margin-bottom:20px;">
-          <label style="font-size:13px; font-weight:600; color:#2c3e50; display:block; margin-bottom:8px;">Link to a Real Monitor</label>
+          <label style="font-size:13px; font-weight:600; color:var(--text); display:block; margin-bottom:8px;">Link to a Real Monitor</label>
           <div style="display:grid; gap:10px;">
             <select id="cfg-monitor" onchange="window.widgetUI.onMonitorDropdownChange(this.value)"
-              style="width:100%; padding:8px; border:1px solid #e0e6ed; border-radius:6px; font-size:13px;">
+              style="width:100%; padding:8px; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:6px; font-size:13px;">
               ${this.monitors.map((m) => `<option value="${m.monitor_id}" ${m.monitor_id === this.selectedMonitorId ? "selected" : ""}>${m.display_name} (${m.monitor_type})</option>`).join("")}
             </select>
             <select id="cfg-metric" onchange="window.widgetUI.onMetricDropdownChange(this.value)"
-              style="width:100%; padding:8px; border:1px solid #e0e6ed; border-radius:6px; font-size:13px;">
+              style="width:100%; padding:8px; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:6px; font-size:13px;">
               ${metricOptions}
             </select>
           </div>
@@ -239,7 +239,7 @@ class WidgetRecommendationUI {
         </div>
 
         <div style="margin-bottom:16px;">
-          <label style="font-size:13px; font-weight:600; color:#2c3e50; display:block; margin-bottom:8px;">Chart Type</label>
+          <label style="font-size:13px; font-weight:600; color:var(--text); display:block; margin-bottom:8px;">Chart Type</label>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
             ${this.CHART_TYPES.map((ct) => `
               <button type="button" class="resource-tab ${ct.id === cfg.chartType ? "active" : ""}"
@@ -249,15 +249,15 @@ class WidgetRecommendationUI {
 
         <div style="display:grid; grid-template-columns:1fr; gap:14px; margin-bottom:20px;">
           <div>
-            <label style="font-size:13px; font-weight:600; color:#2c3e50;">Resource Type${this.confidenceBadge("resource_type")}</label>
+            <label style="font-size:13px; font-weight:600; color:var(--text);">Resource Type${this.confidenceBadge("resource_type")}</label>
             <div style="margin-top:6px;">${optionsSelect("cfg-resource-type", this.engine.resourceTypes, cfg.resourceType)}</div>
           </div>
           <div>
-            <label style="font-size:13px; font-weight:600; color:#2c3e50;">Show${this.confidenceBadge("show_option")}</label>
+            <label style="font-size:13px; font-weight:600; color:var(--text);">Show${this.confidenceBadge("show_option")}</label>
             <div style="margin-top:6px;">${optionsSelect("cfg-show-option", this.engine.showOptions, cfg.showOption)}</div>
           </div>
           <div>
-            <label style="font-size:13px; font-weight:600; color:#2c3e50;">Time Period${this.confidenceBadge("time_period")}</label>
+            <label style="font-size:13px; font-weight:600; color:var(--text);">Time Period${this.confidenceBadge("time_period")}</label>
             <div style="margin-top:6px;">${optionsSelect("cfg-time-period", this.engine.timePeriods, cfg.timePeriod)}</div>
           </div>
         </div>
@@ -265,7 +265,7 @@ class WidgetRecommendationUI {
         ${monitorSectionHTML}
 
         <div style="display:flex; flex-direction:column; gap:10px;">
-          <button class="apply-widgets-btn" style="background:#27ae60;" onclick="window.widgetUI.saveWidget(true)">⚡ Add with Suggested Settings</button>
+          <button class="apply-widgets-btn" style="background:var(--up);" onclick="window.widgetUI.saveWidget(true)">⚡ Add with Suggested Settings</button>
           <button class="apply-widgets-btn" onclick="window.widgetUI.saveWidget(false)">Add Widget</button>
           <button class="resource-tab" onclick="window.widgetUI.renderRecommendations('${type}')">← Back</button>
         </div>

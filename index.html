@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Recommendation Engine</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/widget-recommendation-styles 2.css">
+    <link rel="stylesheet" href="/static/widget-recommendation-styles 2.css?v=3">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
@@ -165,13 +165,48 @@
         .ai-gap-catalog-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 6px; background: rgba(24,160,88,0.14); color: var(--up); display: inline-block; }
         .ai-gap-nocatalog-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 6px; background: rgba(107,121,153,0.16); color: var(--muted); display: inline-block; }
         .ai-warning-line { font-size: 11.5px; color: var(--down); background: rgba(229,62,62,0.08); border: 1px solid rgba(229,62,62,0.2); border-radius: 8px; padding: 8px 10px; margin-bottom: 6px; line-height: 1.4; }
+
+        /* Toasts -- replace native alert() with a themed, non-blocking notification */
+        .toast {
+            pointer-events: auto;
+            min-width: 240px;
+            max-width: 360px;
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 12px 14px;
+            font-size: 13px;
+            line-height: 1.4;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            animation: toast-in 0.25s ease;
+        }
+        .toast.leaving { animation: toast-out 0.2s ease forwards; }
+        .toast-icon { font-size: 15px; line-height: 1; flex-shrink: 0; margin-top: 1px; }
+        .toast.success { border-left-color: var(--up); }
+        .toast.error { border-left-color: var(--down); }
+        .toast.warn { border-left-color: var(--warn); }
+        @keyframes toast-in {
+            from { opacity: 0; transform: translateY(8px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes toast-out {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to { opacity: 0; transform: translateY(8px) scale(0.98); }
+        }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #1c2340; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; display: none;">
-        <div style="color: #7aadff; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; animation: pulse 1.5s infinite ease-in-out;">Syncing Workspace Metrics...</div>
+    <div id="loading-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; display: none;">
+        <div style="color: var(--primary); font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; animation: pulse 1.5s infinite ease-in-out;">Syncing Workspace Metrics...</div>
     </div>
+
+    <div id="toast-stack" style="position: fixed; bottom: 24px; right: 24px; z-index: 10500; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; pointer-events: none;"></div>
 
     <div class="auth-overlay-backdrop" id="auth-layer-panel">
         <div class="auth-card-frame" style="text-align: center; padding: 40px 30px;">
@@ -269,8 +304,8 @@
         </div>
     </div>
 
-    <script src="/static/widget-recommendation-engine 2.js"></script>
-    <script src="/static/widget-recommendation-ui 2.js"></script>
+    <script src="/static/widget-recommendation-engine 2.js?v=3"></script>
+    <script src="/static/widget-recommendation-ui 2.js?v=3"></script>
 
     <script>
         let currentDashboardWidgets = [];
@@ -291,6 +326,22 @@
         function slugifyCustomDashboardName(name) { return "custom_" + name.toLowerCase().replace(/[^a-z0-9]/g, "_"); }
         function showLoadingSpinner() { document.getElementById('loading-overlay').classList.add('active'); }
         function hideLoadingSpinner() { setTimeout(() => { document.getElementById('loading-overlay').classList.remove('active'); }, 400); }
+
+        // Themed replacement for native alert() -- non-blocking, auto-dismissing.
+        // type: 'success' | 'error' | 'warn' | 'info'
+        function showToast(message, type = 'info', duration = 3500) {
+            const stack = document.getElementById('toast-stack');
+            if (!stack) { console.warn('Toast:', message); return; }
+            const icons = { success: '✅', error: '⚠️', warn: '⏳', info: 'ℹ️' };
+            const el = document.createElement('div');
+            el.className = `toast ${type}`;
+            el.innerHTML = `<span class="toast-icon">${icons[type] || icons.info}</span><span>${message}</span>`;
+            stack.appendChild(el);
+            setTimeout(() => {
+                el.classList.add('leaving');
+                setTimeout(() => el.remove(), 220);
+            }, duration);
+        }
 
         // ---- Dark mode ----
         function applyColorTheme(theme) {
@@ -474,7 +525,7 @@
             try {
                 const res = await fetch(`http://127.0.0.1:8000/api/v1/dashboards/unhide/${templateId}`, { method: 'POST' });
                 if ((await res.json()).status === "success") await initStudio();
-            } catch (err) { alert(err); }
+            } catch (err) { showToast(err && err.message ? err.message : String(err), 'error'); }
         }
 
         async function restoreDashboardProfile(templateId, name, category) {
@@ -487,7 +538,7 @@
                     await initStudio();
                     selectDashboardFromSearch(templateId, category);
                 }
-            } catch (err) { alert(err); }
+            } catch (err) { showToast(err && err.message ? err.message : String(err), 'error'); }
         }
 
         async function refreshActiveMonitorMap() {
@@ -557,7 +608,7 @@
                     if (activeDashboardId === templateId) goToHomeWorkspace();
                     await initStudio();
                 }
-            } catch (err) { alert(err); }
+            } catch (err) { showToast(err && err.message ? err.message : String(err), 'error'); }
         }
 
         async function removeDashboardFromDatabase(event, templateId) {
@@ -569,7 +620,7 @@
                     goToHomeWorkspace();
                     await initStudio();
                 }
-            } catch (err) { alert(err); }
+            } catch (err) { showToast(err && err.message ? err.message : String(err), 'error'); }
         }
 
         function goToHomeWorkspace() {
@@ -750,6 +801,22 @@
                 case 'VerticalBar': return 'bar';
                 default: return 'bar';
             }
+        }
+
+        // When we have no real captured chart shape for a widget (cachedChartType
+        // is null), don't blindly hardcode TimeChart -> line for everything.
+        // Instead, guess a sensible chart_type from the widget's own name/label
+        // so an "Alarm Summary" or "NOC" widget doesn't get forced into a line
+        // chart just because nothing was observed yet. Falls back to bar.
+        function guessChartTypeFromLabel(label) {
+            const s = String(label || '').toLowerCase();
+            if (/pie/.test(s)) return 'PieChart';
+            if (/\b(kpi|numeric|number|count|total)\b/.test(s)) return 'Numeric';
+            if (/\barea\b/.test(s)) return 'AreaChart';
+            if (/horizontal/.test(s)) return 'HorizontalBar';
+            if (/\bbar\b/.test(s)) return 'VerticalBar';
+            if (/(time|trend|series|history|over time)/.test(s)) return 'TimeChart';
+            return 'VerticalBar';
         }
 
         // Builds the same {resourceType, showOption, timePeriod} shape the
@@ -985,7 +1052,7 @@
                     body: JSON.stringify({ template_id: generatedId, template_name: name, category_tag: activeCategoryTag, widgets: widgetsPayload, username: authenticatedUserToken })
                 });
                 if(res.ok) {
-                    alert(`Configurations persistent under profile context.`);
+                    showToast('Configuration saved.', 'success');
                     window.__draftTemplateId = null;
                     activeDashboardId = generatedId; activeDashboardName = name;
                     await initStudio();
@@ -995,7 +1062,7 @@
                     document.getElementById('custom-dash-type-text').style.display = 'none';
                     handleSearchFiltering(name);
                 }
-            } catch (err) { alert(err); }
+            } catch (err) { showToast(err && err.message ? err.message : String(err), 'error'); }
         }
 
         function getWorkingTemplateId() {
@@ -1008,7 +1075,7 @@
 
         async function openAddWidgetModal() {
             const tid = getWorkingTemplateId();
-            if (!tid) { alert('Name your dashboard or select one before adding widgets.'); return; }
+            if (!tid) { showToast('Name your dashboard or select one before adding widgets.', 'warn'); return; }
             document.getElementById('aw-modal-backdrop').classList.add('active');
             document.getElementById('aw-modal-title').innerText = 'Add Widget Selection Pipeline';
             const realEngineInstance = new WidgetRecommendationEngine();
@@ -1094,7 +1161,7 @@
             const cachedChartType = (window.__recChartTypeCache && window.__recChartTypeCache[id]) || null;
             const payload = {
                 category: activeCategoryTag || 'Performance Attributes',
-                chart_type: cachedChartType || 'TimeChart', // real captured shape when we have one, else render the mock series as a line
+                chart_type: cachedChartType || guessChartTypeFromLabel(name), // real captured shape when we have one, else guess from the widget's own name/type instead of forcing everything to a line chart
                 resource_type: 'Monitor',
                 monitor_ids: monitorId ? [monitorId] : [], monitor_type: 'Monitor',
                 metric_ids: [{ id, name }], show_option: 'Latest 50 Active Monitors', time_period: 'Last Hour',
@@ -1106,7 +1173,7 @@
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
                 });
                 const data = await res.json();
-                if (data.status !== 'success') { alert(data.message || 'Could not add widget.'); return; }
+                if (data.status !== 'success') { showToast(data.message || 'Could not add widget.', 'error'); return; }
                 currentDashboardWidgets.push({
                     id: data.widget_id,
                     name,
@@ -1116,7 +1183,8 @@
                 renderCanvas();
                 await refreshActiveMonitorMap();
                 fetchRecommendedWidgets();
-            } catch (err) { alert(err); }
+                showToast(`"${name}" added to dashboard.`, 'success');
+            } catch (err) { showToast(err && err.message ? err.message : String(err), 'error'); }
         }
 
         function slugifyGapName(name) {

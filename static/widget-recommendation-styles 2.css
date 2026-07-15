@@ -1,14 +1,19 @@
 /**
  * Widget Recommendation UI Styles
- * Clean, modern styling compatible with Site24x7 dashboard
+ * Uses the same theme variables as index.html (--card, --bg, --text, --muted,
+ * --border, --primary, --primary-light, --shadow) so this panel follows the
+ * app's light/dark theme instead of being hardcoded to light colors. Without
+ * this, dark mode ends up with dark text on a dark card (near-invisible),
+ * since index.html's own .widget-card rule (which IS theme-aware) overrides
+ * the background here, while these child text colors used to stay hardcoded.
  */
 
 /* Main Container */
 .widget-recommendation-selector {
   padding: 20px;
-  background: #f8f9fa;
+  background: var(--bg);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow);
 }
 
 .recommendation-header {
@@ -19,13 +24,13 @@
   margin: 0 0 8px 0;
   font-size: 20px;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text);
 }
 
 .recommendation-header p {
   margin: 0;
   font-size: 14px;
-  color: #7f8c8d;
+  color: var(--muted);
 }
 
 /* Resource Type Tabs */
@@ -38,27 +43,27 @@
 
 .resource-tab {
   padding: 10px 18px;
-  border: 2px solid #e0e6ed;
-  background: white;
+  border: 2px solid var(--border);
+  background: var(--card);
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  color: #5a6c7d;
+  color: var(--muted);
   transition: all 0.3s ease;
   white-space: nowrap;
 }
 
 .resource-tab:hover {
-  border-color: #3498db;
-  color: #3498db;
-  background: #f0f7ff;
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
 }
 
 .resource-tab.active {
-  border-color: #3498db;
-  background: #3498db;
-  color: white;
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #ffffff;
 }
 
 /* Recommendations Panel */
@@ -80,20 +85,20 @@
 .recommendations-header {
   margin-bottom: 20px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e0e6ed;
+  border-bottom: 1px solid var(--border);
 }
 
 .recommendations-header h4 {
   margin: 0 0 6px 0;
   font-size: 16px;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text);
 }
 
 .recommendations-header p {
   margin: 0;
   font-size: 13px;
-  color: #7f8c8d;
+  color: var(--muted);
 }
 
 /* Search Box */
@@ -104,17 +109,23 @@
 .search-box input {
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid #e0e6ed;
+  border: 1px solid var(--border);
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
+  background: var(--card);
+  color: var(--text);
   transition: border-color 0.2s;
+}
+
+.search-box input::placeholder {
+  color: var(--muted);
 }
 
 .search-box input:focus {
   outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
 }
 
 /* Widgets Grid */
@@ -126,8 +137,8 @@
 }
 
 .widget-card {
-  background: white;
-  border: 1px solid #e0e6ed;
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 16px;
   transition: all 0.3s ease;
@@ -137,8 +148,8 @@
 }
 
 .widget-card:hover {
-  border-color: #3498db;
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+  border-color: var(--primary);
+  box-shadow: var(--shadow);
   transform: translateY(-2px);
 }
 
@@ -159,14 +170,14 @@
   margin: 0;
   font-size: 15px;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text);
   flex: 1;
 }
 
 .widget-description {
   margin: 0 0 12px 0;
   font-size: 13px;
-  color: #5a6c7d;
+  color: var(--muted);
   line-height: 1.5;
   flex: 1;
 }
@@ -189,20 +200,20 @@
 }
 
 .badge-type {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: var(--primary-light);
+  color: var(--primary);
 }
 
 .badge-usecase {
-  background: #f3e5f5;
-  color: #7b1fa2;
+  background: rgba(123, 31, 162, 0.12);
+  color: #a568c9;
 }
 
 .add-widget-btn {
   align-self: flex-start;
   padding: 8px 14px;
-  background: #27ae60;
-  color: white;
+  background: var(--up);
+  color: #ffffff;
   border: none;
   border-radius: 4px;
   font-size: 13px;
@@ -213,14 +224,14 @@
 }
 
 .add-widget-btn:hover {
-  background: #229954;
+  filter: brightness(0.92);
   transform: translateX(2px);
 }
 
 /* Selected Widgets Summary */
 .selected-widgets-summary {
-  background: white;
-  border: 1px solid #e0e6ed;
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 16px;
   margin-top: 20px;
@@ -230,11 +241,11 @@
   margin: 0 0 12px 0;
   font-size: 14px;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text);
 }
 
 #selected-count {
-  color: #3498db;
+  color: var(--primary);
   font-weight: 700;
 }
 
@@ -252,15 +263,15 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 12px;
-  background: #f8f9fa;
+  background: var(--bg);
   border-radius: 4px;
   font-size: 13px;
-  color: #2c3e50;
+  color: var(--text);
 }
 
 .remove-btn {
-  background: #e74c3c;
-  color: white;
+  background: var(--down);
+  color: #ffffff;
   border: none;
   width: 24px;
   height: 24px;
@@ -274,15 +285,15 @@
 }
 
 .remove-btn:hover {
-  background: #c0392b;
+  filter: brightness(0.9);
   transform: scale(1.1);
 }
 
 .apply-widgets-btn {
   width: 100%;
   padding: 12px;
-  background: #3498db;
-  color: white;
+  background: var(--primary);
+  color: #ffffff;
   border: none;
   border-radius: 6px;
   font-size: 14px;
@@ -292,13 +303,14 @@
 }
 
 .apply-widgets-btn:hover:not(:disabled) {
-  background: #2980b9;
+  background: var(--primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+  box-shadow: var(--shadow);
 }
 
 .apply-widgets-btn:disabled {
-  background: #bdc3c7;
+  background: var(--border);
+  color: var(--muted);
   cursor: not-allowed;
   opacity: 0.6;
 }
